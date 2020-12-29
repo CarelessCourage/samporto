@@ -1,6 +1,6 @@
 <template>
   <div class="ThreeTest">
-    <div class="content" :class="{ expanded: expanded }">
+    <div class="titles" :class="{ expanded: expanded }">
       <h1 v-if="Math.round(position) >= -0">The unborn are a</h1>
       <h1 v-if="Math.round(position) == -1">God is god</h1>
       <h1 v-if="Math.round(position) == -2">This is</h1>
@@ -17,7 +17,6 @@
       <div class="sheet" :class="{ open: expanded }"></div>
       <div id="canvas2"></div>
     </div>
-    <expanded :expanded="expanded" />
   </div>
 </template>
 
@@ -29,13 +28,9 @@ import gsap from "gsap";
 import fragment from "./shader/fragment.glsl";
 import vertex from "./shader/vertex.glsl";
 
-import expanded from "./expanded.vue";
-
 export default {
   name: "ThreeTest",
-  components: {
-    expanded,
-  },
+  props: ["expanded"],
   data() {
     return {
       images: [
@@ -55,7 +50,6 @@ export default {
           img: require("../assets/no.jpg"),
         },
       ],
-      expanded: false,
       scrollSpeed: 0,
       position: -1,
     };
@@ -163,35 +157,17 @@ export default {
           if (pos < ri) {
             this.scrollSpeed = -0.2;
           } else if (pos > ri) {
-            console.log("up");
             this.scrollSpeed = 0.2;
           } else if (pos == ri) {
-            if (this.expanded) {
-              this.moveGroup(group);
-            } else {
-              let rotation = group.rotation;
-              let position = group.position;
-
-              gsap.to(rotation, {
-                duration: 0.3,
-                x: -0,
-                y: -0,
-                z: -0,
-              });
-              gsap.to(position, {
-                duration: 0.3,
-                x: 0,
-              });
-            }
-            this.expanded = !this.expanded;
             uniforms.expanded.value = this.expanded;
+            this.moveGroup(group, false, true);
           }
         };
 
         mesh.on("click", function () {
           changeCenteredPosition(-i);
-          console.log(group.rotation);
         });
+
         group.add(mesh);
       });
 
@@ -231,21 +207,44 @@ export default {
         this.scrollSpeed += 0.1;
       }
     },
-    moveGroup: function (group) {
+    moveGroup: function (group, bool, refresh) {
+      let stay = false;
+      stay = bool;
+
+      let expanded = this.expanded;
+
+      if (refresh) {
+        expanded = !this.expanded;
+        this.$emit("expand");
+      }
+
       let rotation = group.rotation;
       let position = group.position;
 
-      gsap.to(rotation, {
-        duration: 0.3,
-        x: -0.5,
-        y: -0.5,
-        z: -0.3,
-      });
+      if (!expanded || stay) {
+        gsap.to(rotation, {
+          duration: 0.3,
+          x: -0.5,
+          y: -0.5,
+          z: -0.3,
+        });
 
-      gsap.to(position, {
-        duration: 0.3,
-        x: 1,
-      });
+        gsap.to(position, {
+          duration: 0.3,
+          x: 1,
+        });
+      } else {
+        gsap.to(rotation, {
+          duration: 0.3,
+          x: -0,
+          y: -0,
+          z: -0,
+        });
+        gsap.to(position, {
+          duration: 0.3,
+          x: 0,
+        });
+      }
     },
   },
   mounted() {
@@ -274,8 +273,8 @@ export default {
     console.log(group1, group2);
 
     //Rotate and move the meshes
-    this.moveGroup(group1);
-    this.moveGroup(group2);
+    this.moveGroup(group1, true, false);
+    this.moveGroup(group2, false, false);
 
     //group2.position.x = 0;
   },
@@ -283,27 +282,22 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.content {
+.titles {
   position: absolute;
   top: 20vw;
   left: 10vw;
   max-height: 10vh;
   z-index: 10;
   pointer-events: none;
-  transition: top 0.8s ease-in-out;
+  //transition: top 0.8s ease-in-out;
+  transition: 0.8s ease-in-out;
   transition-delay: 0.4s;
   &.expanded {
-    top: 110vh;
+    //left: 5vw;
+    //top: 120vh;
   }
   h1 {
-    margin: 0px;
-    text-align: left;
-    font-size: 10em;
-    width: 8em;
-    //background: red;
-    text-transform: uppercase;
-    //font-family: "cocogoose";
-    font-weight: bold;
+    width: 5em;
     line-height: 0.8em;
   }
   p {
