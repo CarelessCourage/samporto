@@ -1,20 +1,37 @@
 #Buggs
     [0]: scrollswitch repeat
     [0]: panelscroll cooldown on enter and leave
-    [0]: fix sub panel doubble borders
+    [100]: fix sub panel doubble borders
+    [100]: fix panel fixed issue
+    [0]: panel intro text offset 
 #vibe
-    [0]: fade off center sub panels
+    [100]: fade off center sub panels
     [0]: sheet rainbow
     [0]: fancy wave on image
     [0]: grain
+    [0]: intro slide
+    [0]: quick slide
 #features
     [0]: data propagation
-    [0]: image panel
-    [0]: color swatches panel
+    [100]: image panel
+    [100]: image panel variation
     [0]: panel content outline
-    [0]: menu
+    [100]: menu
     [0]: logo
     [0]: about page
     [0]: full stopp playlist
     [0]: social media links
     [0]: patreon
+    [100]: page NR
+    [100]: scroll slider
+    [100]: scroll zoom overview 
+    [100]: scroll panel indicators
+#Responsive
+    [0]: img panel
+    [0]: intro panel
+    [0]: fullstop panel
+    [0]: three.js menu
+    [0]: three.js select
+    [0]: menu
+#port ver
+    [0]: color swatches panel

@@ -1,7 +1,7 @@
 <template>
   <div id="expanded" class="container" :style="'left: ' + pPosition + 'vw;'">
     <div
-      v-if="true"
+      v-if="false"
       style="
         position: fixed;
         top: 50;
@@ -14,20 +14,55 @@
       <p>mPosition: {{ pPosition }}</p>
       <p>mScroll: {{ mScroll }}</p>
       <p>mTarget: {{ pTarget }}</p>
+      <p>sliderID: {{ sliderID }}</p>
     </div>
-    <div class="head" @click="$emit('close')" v-if="true">
-      <div class="x"></div>
+    <div class="slider2" v-if="false">
+      <input
+        type="range"
+        :min="-sumWidth"
+        max="0"
+        v-model="pPosition"
+        id="myRange"
+      />
     </div>
+    <panelControl
+      v-if="true"
+      :targets="targets"
+      :position="pPosition"
+      :sumWidth="sumWidth"
+      :sliderIndicator="sliderIndicator"
+      :sliderID="sliderID"
+      @close="$emit('close')"
+      @gsapTo="gsapTo(...arguments)"
+      @sliderToggle="sliderIndicator = arguments[0]"
+      @indicatorPanel="indicatorPanel = arguments[0]"
+    />
     <div class="panels">
+      <panelMenu
+        :targets="targets"
+        :slider="slider"
+        :sliderIndicator="sliderIndicator"
+        :pPosition="pPosition"
+        :indicatorPanel="indicatorPanel"
+        @gsapTo="gsapTo(...arguments)"
+        @hoverLi="
+          sliderIndicator = arguments[0];
+          sliderID = arguments[1];
+        "
+      />
       <component
         v-for="(panel, index) in panels"
         :key="index"
         :is="panel.component"
         class="panel"
+        :class="{ slideOn: slider }"
         :pPosition="pPosition"
         :panel="panel"
         @mounted="assignWidth(index, ...arguments)"
       ></component>
+    </div>
+    <div class="foot" v-if="Math.abs(mPos) > 20">
+      <h1>{{ getCurrentPageComp + 1 }}/{{ targets.length }}</h1>
     </div>
   </div>
 </template>
@@ -41,15 +76,28 @@ gsap.registerPlugin(ScrollTrigger);
 
 import intro from "./panels/intro.vue";
 import fullstopp from "./panels/fullstopp.vue";
+import images from "./panels/images.vue";
+import gradient from "./panels/gradient.vue";
+import panelControl from "./panelControl.vue";
+import panelMenu from "./panelMenu.vue";
+
 export default {
   name: "expanded",
-  props: ["mScroll"],
+  props: ["mScroll", "mPos"],
   components: {
     intro,
     fullstopp,
+    images,
+    gradient,
+    panelControl,
+    panelMenu,
   },
   data() {
     return {
+      slider: false,
+      indicatorPanel: 0,
+      sliderIndicator: false,
+      sliderID: 0,
       pPosition: 0,
       pTarget: -0,
       panels: [
@@ -62,15 +110,19 @@ export default {
             " This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible, or are flexible but have reached their maximum size. It also exerts some control over the alignment of items when they overflow the line. .container { This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible,",
         },
         {
-          title: "",
-          component: "fullstopp",
+          title: "For geet God",
+          component: "images",
           width: 100,
-          subTargets: [{ width: 5 }, { width: 5 }, { width: 5 }],
+          subTargets: [
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+          ],
           content:
             " This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible, or are flexible but have reached their maximum size. It also exerts some control over the alignment of items when they overflow the line. .container { This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible,",
         },
         {
-          title: "",
+          title: "for god es",
           component: "fullstopp",
           width: 100,
           subTargets: [
@@ -86,33 +138,167 @@ export default {
           content:
             " This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible, or are flexible but have reached their maximum size. It also exerts some control over the alignment of items when they overflow the line. .container { This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible,",
         },
+        {
+          title: "God is God",
+          component: "intro",
+          width: 100,
+          subTargets: [],
+          content:
+            " This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible, or are flexible but have reached their maximum size. It also exerts some control over the alignment of items when they overflow the line. .container { This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible,",
+        },
+        {
+          title: "For geet God",
+          component: "images",
+          width: 100,
+          subTargets: [
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+          ],
+          content:
+            " This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible, or are flexible but have reached their maximum size. It also exerts some control over the alignment of items when they overflow the line. .container { This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible,",
+        },
+        {
+          title: "for god es",
+          component: "fullstopp",
+          width: 100,
+          subTargets: [
+            { width: 5 },
+            { width: 5 },
+            { width: 5 },
+            { width: 5 },
+            { width: 5 },
+            { width: 5 },
+            { width: 5 },
+            { width: 5 },
+          ],
+          content:
+            " This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible, or are flexible but have reached their maximum size. It also exerts some control over the alignment of items when they overflow the line. .container { This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible,",
+        },
+        {
+          title: "God is God",
+          component: "intro",
+          width: 100,
+          subTargets: [],
+          content:
+            " This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible, or are flexible but have reached their maximum size. It also exerts some control over the alignment of items when they overflow the line. .container { This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible,",
+        },
+        {
+          title: "For geet God",
+          component: "images",
+          width: 100,
+          subTargets: [
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+          ],
+          content:
+            " This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible, or are flexible but have reached their maximum size. It also exerts some control over the alignment of items when they overflow the line. .container { This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible,",
+        },
+        {
+          title: "For geet God",
+          component: "images",
+          width: 100,
+          subTargets: [
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+          ],
+          content:
+            " This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible, or are flexible but have reached their maximum size. It also exerts some control over the alignment of items when they overflow the line. .container { This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible,",
+        },
+        {
+          title: "For geet God",
+          component: "images",
+          width: 100,
+          subTargets: [
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+          ],
+          content:
+            " This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible, or are flexible but have reached their maximum size. It also exerts some control over the alignment of items when they overflow the line. .container { This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible,",
+        },
+        {
+          title: "For geet God",
+          component: "images",
+          width: 100,
+          subTargets: [
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+          ],
+          content:
+            " This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible, or are flexible but have reached their maximum size. It also exerts some control over the alignment of items when they overflow the line. .container { This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible,",
+        },
+        {
+          title: "For geet God",
+          component: "images",
+          width: 100,
+          subTargets: [
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+          ],
+          content:
+            " This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible, or are flexible but have reached their maximum size. It also exerts some control over the alignment of items when they overflow the line. .container { This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible,",
+        },
+        {
+          title: "For geet God",
+          component: "images",
+          width: 100,
+          subTargets: [
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+            { url: require("../assets/Fleur.png"), width: 5 },
+          ],
+          content:
+            " This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible, or are flexible but have reached their maximum size. It also exerts some control over the alignment of items when they overflow the line. .container { This defines the alignment along the main axis. It helps distribute extra free space leftover when either all the flex items on a line are inflexible,",
+        },
       ],
       targets: [],
       sumWidth: 0,
+      currentPanel: 0,
     };
+  },
+  computed: {
+    getCurrentPageComp: function () {
+      let pos = Math.abs(this.pPosition);
+      let current = this.targets.reduce((a, b) => {
+        return Math.abs(b.position - pos) < Math.abs(a.position - pos) ? b : a;
+      });
+      var index = current.id;
+      return index;
+    },
   },
 
   methods: {
+    slideToggle: function (bool) {
+      this.slider = bool;
+    },
+    gsapTo: function (obj) {
+      gsap.to(this, obj);
+    },
     assignWidth: function (index, panelPositions) {
-      let panel = panelPositions.filter((t) =>
-        t.name == "panel" ? true : false
-      );
+      if (panelPositions) {
+        let panel = panelPositions.filter((t) =>
+          t.name == "panel" ? true : false
+        );
 
-      this.panels[index].width = panel[0].width;
+        this.panels[index].width = panel[0].width;
 
-      let subPanel = panelPositions.filter((t) =>
-        t.name == "subPanel" ? true : false
-      );
+        let subPanel = panelPositions.filter((t) =>
+          t.name == "subPanel" ? true : false
+        );
 
-      this.panels[index].subTargets.forEach((t) => {
-        t.width = subPanel[0].width;
-      });
+        this.panels[index].subTargets.forEach((t) => {
+          t.width = subPanel[0].width;
+        });
+      }
 
       //subPanel.forEach((t) => {
       //  this.panels.push(t);
       //});
-
-      console.log("lol panel: ", this.panels);
     },
     print: function () {
       console.log("sumWidth: ", this.sumWidth);
@@ -129,8 +315,9 @@ export default {
     updateTargets: function () {
       const panels = this.panels;
       let sumWidth = 0;
-      let calcTarg = panels.map((t) => {
+      let calcTarg = panels.map((t, index) => {
         t.position = sumWidth;
+        t.id = index;
         //if (t.subTargets) {
         //check subtargets
         let arrayes = t.subTargets;
@@ -151,7 +338,6 @@ export default {
         });
       });
       this.targets.push(...arrayeee);
-      console.log("All targets: ", this.targets);
     },
     pickTarget: function () {
       let pos = Math.abs(this.pPosition);
@@ -226,17 +412,31 @@ export default {
 </script>
 
 <style lang="scss">
+.slider2 input {
+  position: fixed;
+  top: 0px;
+  left: 5em;
+  width: 70vw;
+}
+
 #expanded {
+  --panelHeadHeight: 15vh;
   position: relative;
   background: white;
   transition: 0.4s;
   display: grid;
-  grid-template-rows: 15vh 1fr;
+  grid-template-rows: var(--panelHeadHeight) 1fr;
   height: 100vh;
   position: absolute;
   left: -10vw;
 }
+
+.slideOn {
+  transform: scale(0.9);
+}
+
 .panels {
+  position: relative;
   display: flex;
   flex-direction: row;
 }
@@ -244,42 +444,24 @@ export default {
 .panel {
   min-width: 100vw;
   position: relative;
+  transition: 0.8s;
+  transform-origin: left center;
 }
 
-.head {
-  --border: 3px;
-  border-bottom: var(--border) solid rgb(0, 0, 0);
-  border-top: var(--border) solid rgb(0, 0, 0);
+.foot {
+  position: fixed;
+  bottom: 2em;
+  right: 2em;
+  z-index: 999;
   display: flex;
   justify-content: flex-end;
-  align-items: center;
-  cursor: pointer;
-  &:hover {
-    background: red;
-  }
-  &:active {
-    opacity: 0.5;
-  }
-}
-.x {
-  position: fixed;
-  right: 10px;
-  height: 5em;
-  width: 5em;
-  margin-right: 1.5em;
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    height: 0.5em;
-    width: 100%;
-    background: black;
-    top: 40%;
-    left: 0px;
-    transform: rotateZ(45deg);
-  }
-  &::after {
-    transform: rotateZ(-45deg);
+  align-items: flex-end;
+  h1 {
+    font-size: 5em;
+    left: 0;
+    text-align: right;
+    position: relative;
   }
 }
 </style>
+ 

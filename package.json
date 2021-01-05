@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "fitty": "^2.3.3",
     "glslify-loader": "^2.0.0",
     "gsap": "^3.5.1",
     "lodash": "^4.17.20",

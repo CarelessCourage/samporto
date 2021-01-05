@@ -29,6 +29,7 @@
       <div class="section lol" v-if="expanded">
         <expanded
           :mScroll="mScroll"
+          :mPos="mPosition"
           @close="togglePanel(0)"
           @panelPositionInactive="panelActivty"
         />
@@ -100,7 +101,7 @@ export default {
     },
     magneticScroll: function () {
       if (this.mPosition < -99.5 && !this.panelPositionInactive) {
-        console.log("mPosition is scroll locked");
+        //console.log("mPosition is scroll locked"); ;
       } else {
         //update position with scroll values
         this.mPosition += -this.mScroll;
@@ -147,6 +148,10 @@ export default {
 </script>
 
 <style lang="scss">
+:root {
+  --border: 3px;
+}
+
 h1 {
   margin: 0px;
   text-align: left;
@@ -154,6 +159,19 @@ h1 {
   text-transform: uppercase;
   font-weight: bold;
   line-height: 0.8em;
+}
+
+h2 {
+  margin: 0px;
+  text-align: left;
+  font-size: 2em;
+  font-weight: bold;
+}
+
+p {
+  margin: 0px;
+  text-align: left;
+  font-size: 1.5em;
 }
 
 .lol {

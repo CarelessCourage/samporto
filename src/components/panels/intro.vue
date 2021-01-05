@@ -2,7 +2,9 @@
   <div id="intro" ref="panel">
     <div class="header">
       <div class="patch">
-        <h1 :style="'left: ' + -pPosition / 8 + 'em;'">{{ panel.title }}</h1>
+        <h1 :style="'left: ' + normalizePosition(5, 1) + 'vw;'">
+          {{ panel.title }}
+        </h1>
       </div>
     </div>
     <div class="content">
@@ -19,6 +21,18 @@ export default {
   methods: {
     percentage: function (partialValue, totalValue) {
       return (100 * partialValue) / totalValue;
+    },
+    normalizePosition: function (pos, mul) {
+      //setup
+      let scroll = Math.abs(this.pPosition);
+      let position = Math.abs(this.panel.position);
+      let res = scroll - position;
+
+      //Add user input, divide and multiply
+      let diffMul = res * mul;
+
+      //result
+      return diffMul + pos;
     },
   },
   mounted() {
@@ -68,6 +82,7 @@ h1 {
       padding-top: 10em;
       box-sizing: border-box;
       overflow: hidden;
+      pointer-events: none;
     }
   }
 
@@ -78,7 +93,6 @@ h1 {
     p {
       text-align: left;
       width: 60%;
-      font-size: 1.5em;
     }
   }
 }
