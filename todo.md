@@ -4,6 +4,7 @@
     [100]: fix sub panel doubble borders
     [100]: fix panel fixed issue
     [0]: panel intro text offset 
+    [100]: Remove error and warning buildup 1
 #vibe
     [100]: fade off center sub panels
     [0]: sheet rainbow
@@ -26,6 +27,7 @@
     [100]: scroll slider
     [100]: scroll zoom overview 
     [100]: scroll panel indicators
+    [100]: make custom preloader function
 #Responsive
     [0]: img panel
     [0]: intro panel

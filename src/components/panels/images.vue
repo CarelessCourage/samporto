@@ -75,8 +75,14 @@ export default {
     },
     initPanel: function () {
       let panelPositions = [];
-      let pWidth = this.$refs.panel.offsetWidth;
-      var w = window.innerWidth;
+      let pWidth = 900;
+      let w = pWidth;
+
+      window.onload = function () {
+        w = window.innerWidth;
+        pWidth = this.$refs.panel.offsetWidth;
+      };
+
       let pPercentage = this.percentage(pWidth, w);
 
       panelPositions.push({ name: "panel", width: pPercentage });

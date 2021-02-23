@@ -1,16 +1,19 @@
 <template>
-  <div class="panelMenu" @click="currentPosition()">
-    <div class="menuBtn" @click="menuToggle = !menuToggle">
+  <div class="panelMenu" @click="currentPosition()" ref="panels">
+    <!-- Menu Button -->
+    <div class="menuBtn" @click="menuToggleClicked">
       <div class="lines"></div>
     </div>
+    <!-- Menu -->
     <div
       class="menuText"
       :class="{ off: !menuToggle }"
       ref="menuText"
       v-if="true"
     >
+      <!-- Highlight Element -->
       <div
-        v-if="slider || sliderIndicator"
+        :class="{ on: slider || sliderIndicator }"
         class="highlight"
         :style="
           'width: ' +
@@ -24,7 +27,8 @@
           'px;'
         "
       ></div>
-      <ul class="main">
+      <!-- Panel List -->
+      <ul class="main" ref="ulMain" :style="'top: ' + relativeScroll + 'px;'">
         <ul v-for="t in fTargets" :key="t.id" :id="t.id" class="title">
           <p
             @click="clickedLi(t.id)"
@@ -66,7 +70,7 @@ export default {
   data() {
     return {
       menuToggle: false,
-      index: 0,
+      index: 1,
       current: 0,
       fTargets: [],
       highlight: {
@@ -92,17 +96,61 @@ export default {
       this.currentPosition();
     },
   },
+  computed: {
+    // a computed getter
+    relativeScroll: function () {
+      let pos = this.pPosition;
+
+      //Get the width of the entire panel scroll
+      let width = 0;
+      if (this.$refs.panels) {
+        width = this.$refs.panels.clientWidth;
+      }
+
+      //Get percentage of panelwide scroll
+      let panelWidePercentage = this.percentage(pos, width);
+
+      //Get the height of the meny summary
+      let height = 0;
+      if (this.$refs.ulMain) {
+        height = this.$refs.ulMain.clientHeight;
+      }
+
+      //Get percentage of panelwide scroll
+      var result = ((panelWidePercentage * 10) / 100) * height;
+
+      return result;
+    },
+  },
   methods: {
+    menuToggleClicked: function () {
+      let toggle = this.menuToggle;
+      if (toggle) {
+        this.$store.commit("scrollAmountChange", 0.5);
+      } else {
+        this.$store.commit("scrollAmountChange", 10);
+      }
+      this.menuToggle = !this.menuToggle;
+
+      this.$emit("menuToggleClicked", this.menuToggle);
+    },
+    percentage: function (partialValue, totalValue) {
+      return (100 * partialValue) / totalValue;
+    },
     currentPosition: function () {
       let pos = Math.abs(this.pPosition);
       let t = this.targets;
-      let current = t.reduce((a, b) => {
-        return Math.abs(b.position - pos) < Math.abs(a.position - pos) ? b : a;
-      });
+      let current = [{ id: 0 }];
+
+      if (t.length) {
+        current = t.reduce((a, b) => {
+          return Math.abs(b.position - pos) < Math.abs(a.position - pos)
+            ? b
+            : a;
+        });
+      }
 
       this.current = current.id;
-
-      //console.log("targetttt: ", current.id);
     },
     gsapTo: function (pos) {
       this.$emit("gsapTo", {
@@ -120,27 +168,29 @@ export default {
     },
     moveHighlight: function () {
       let index = this.index;
-      let li = document.getElementById(index);
 
+      let li = document.getElementById(index);
       let parent = this.$refs.menuText;
 
-      var parentRect = parent.getBoundingClientRect();
-      var childRect = li.getBoundingClientRect();
+      if ((li != null) & (parent != null)) {
+        var parentRect = parent.getBoundingClientRect();
+        var childRect = li.getBoundingClientRect();
 
-      let topDist = Math.abs(parentRect.top - childRect.top);
-      let leftDist = Math.abs(parentRect.x - childRect.x);
+        let topDist = Math.abs(parentRect.top - childRect.top);
+        let leftDist = Math.abs(parentRect.x - childRect.x);
 
-      let height = li.clientHeight;
-      let width = li.clientWidth;
-      let left = leftDist;
-      let top = topDist;
+        let height = li.clientHeight;
+        let width = li.clientWidth;
+        let left = leftDist;
+        let top = topDist;
 
-      this.highlight = {
-        width: width,
-        height: height,
-        left: left,
-        top: top,
-      };
+        this.highlight = {
+          width: width,
+          height: height,
+          left: left,
+          top: top,
+        };
+      }
     },
     formatTargets: function () {
       let t = this.targets;
@@ -188,7 +238,6 @@ export default {
       });
 
       this.fTargets = result;
-      //console.log("tagets: ", result);
     },
   },
   mounted() {
@@ -201,21 +250,27 @@ export default {
 .highlight {
   //border-radius: 1em;
   background: rgb(177, 177, 177);
-  height: 5em;
-  width: 5em;
+  height: 0px;
+  width: 0px;
   position: absolute;
   top: 0px;
+  left: 0px;
   border: solid var(--border) black;
   transition: 0.4s;
   pointer-events: none;
+  opacity: 0;
+  &.on {
+    opacity: 1;
+  }
 }
 
 .menuText {
   position: relative;
   padding: 5em;
+  padding-top: 10em;
   width: 100vw;
   box-sizing: border-box;
-  height: calc(100vh - var(--panelHeadHeight));
+  //height: calc(100vh - var(--panelHeadHeight));
   left: 0;
   right: 0;
   margin-left: auto;
@@ -262,6 +317,8 @@ export default {
     margin-bottom: 1em;
   }
   ul.main {
+    //transform: translateY(-15vh);
+    top: 0vh;
     position: relative;
     z-index: 99;
     //background: rgba(255, 0, 0, 0.212);

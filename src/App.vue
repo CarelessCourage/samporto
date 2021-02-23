@@ -11,11 +11,12 @@
       "
     >
       <p>mPosition: {{ mPosition }}</p>
-      <p>mScroll: {{ mScroll }}</p>
-      <p>mTarget: {{ mTarget }}</p>
-      <p>shiftLimit: {{ shiftLimit }}</p>
-      <p>cooldown: {{ cooldown }}</p>
+      <p v-if="false">mScroll: {{ mScroll }}</p>
+      <p v-if="false">mTarget: {{ mTarget }}</p>
+      <p v-if="false">shiftLimit: {{ shiftLimit }}</p>
+      <p v-if="false">cooldown: {{ cooldown }}</p>
     </div>
+    <navigation />
     <div
       class="page"
       :class="{ engaged: panels }"
@@ -27,7 +28,7 @@
         :expanded="expanded"
       />
       <div class="section lol" v-if="expanded">
-        <expanded
+        <panelsExpanded
           :mScroll="mScroll"
           :mPos="mPosition"
           @close="togglePanel(0)"
@@ -48,13 +49,15 @@ gsap.registerPlugin(ScrollTrigger);
 var _ = require("lodash");
 
 import threeScene from "./components/threeScene.vue";
-import expanded from "./components/expanded.vue";
+import panelsExpanded from "./components/panelsExpanded.vue";
+import navigation from "./components/navigation.vue";
 
 export default {
   name: "App",
   components: {
     threeScene,
-    expanded,
+    panelsExpanded,
+    navigation,
   },
   data() {
     return {
@@ -67,6 +70,7 @@ export default {
       shiftLimit: -25,
       cooldown: false,
       panelPositionInactive: false,
+      yStart: 0,
     };
   },
   watch: {
@@ -83,16 +87,14 @@ export default {
     panelActivty: function (bool) {
       this.panelPositionInactive = bool;
     },
-    print: function (d) {
-      console.log("inactive: " + d);
-    },
     togglePanel: function (target) {
       gsap.to(this, {
         duration: 0.8,
         mPosition: target,
       });
     },
-    cShiftLimit: function () {
+    changeShiftLimit: function () {
+      //change shift limit so its closer to the current position than half away.
       if (this.mPosition > -50) {
         this.shiftLimit = -25;
       } else {
@@ -101,7 +103,7 @@ export default {
     },
     magneticScroll: function () {
       if (this.mPosition < -99.5 && !this.panelPositionInactive) {
-        //console.log("mPosition is scroll locked"); ;
+        //pass ;
       } else {
         //update position with scroll values
         this.mPosition += -this.mScroll;
@@ -127,11 +129,30 @@ export default {
       //Update the function every animation frame
       window.requestAnimationFrame(this.magneticScroll);
     },
+    touchScroll: function () {
+      let that = this;
+      const body = document.body;
+      body.addEventListener("touchstart", function (event) {
+        this.yStart = event.touches[0].clientY;
+      });
+      body.addEventListener("touchmove", function (event) {
+        let yNew = event.touches[0].clientY;
+        let newnew = yNew - this.yStart;
+        that.mPosition += newnew / 100;
+      });
+    },
+    getDoc: function () {
+      fetch(
+        "https://docs.googleapis.com/v1/documents/1yxpvWouM177KL3JHMPezILp3zPcw_k3y1Ca0SiIBl_Q"
+      ).then((res) => {
+        return res.json;
+      });
+    },
   },
   mounted() {
     window.addEventListener("wheel", (e) => {
       let delta = 0;
-      let amount = 0.5;
+      let amount = this.$store.state.scrollAmount;
       if (this.expanded) {
         if (e.deltaY > 0) {
           delta = amount;
@@ -139,15 +160,28 @@ export default {
           delta = -amount;
         }
         this.mScroll += delta;
-        this.cShiftLimit();
+        this.changeShiftLimit();
       }
     });
+
+    //this.touchScroll();
     this.magneticScroll();
   },
 };
 </script>
 
 <style lang="scss">
+html {
+  background: black;
+}
+
+.page {
+  --marginTop: -8em;
+  --marginRight: 8em;
+  background: white;
+  transform: translate(var(--marginTop), var(--marginRight));
+}
+
 :root {
   --border: 3px;
 }
@@ -223,7 +257,7 @@ html {
   text-align: center;
   color: #2c3e50;
   max-width: 100vw;
-  position: relative;
+  position: fixed;
 }
 body {
   margin: 0px;

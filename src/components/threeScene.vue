@@ -1,5 +1,10 @@
 <template>
   <div class="ThreeTest">
+    <div v-if="false">
+      <p>{{ position }}</p>
+      <p>{{ touch.yStart }}</p>
+      <p>{{ touch.distanceFromStart }}</p>
+    </div>
     <div class="titles" :class="{ expanded: expanded }">
       <h1 v-if="Math.round(position) >= -0">The unborn are a</h1>
       <h1 v-if="Math.round(position) == -1">God is god</h1>
@@ -21,6 +26,7 @@
 </template>
 
 <script>
+//import preload from "preloadjs";
 import * as Three from "three";
 import { Interaction } from "three.interaction";
 import gsap from "gsap";
@@ -33,6 +39,11 @@ export default {
   props: ["expanded"],
   data() {
     return {
+      preloader: {
+        total: 0,
+        cached: 0,
+        complete: false,
+      },
       images: [
         {
           img: require("../assets/lorem.jpg"),
@@ -52,6 +63,13 @@ export default {
       ],
       scrollSpeed: 0,
       position: -1,
+      touch: {
+        test: 0,
+        yStart: 0,
+        distanceFromStart: 0,
+        last: 0,
+        temp: false,
+      },
     };
   },
   methods: {
@@ -71,7 +89,10 @@ export default {
       let that = this;
 
       (function main(frame) {
-        material.needsUpdate = true;
+        if (that.preloader.complete) {
+          material.needsUpdate = true;
+        }
+
         material.uniforms.time.value = frame / 2;
 
         material.uniforms.scroll.value = that.scrollSpeed;
@@ -99,6 +120,8 @@ export default {
       return mesh;
     },
     init: function (canvas, opacity, hole) {
+      /* eslint-disable */
+
       let container = canvas;
 
       let camera = new Three.PerspectiveCamera(
@@ -115,7 +138,7 @@ export default {
       renderer.setClearColor(0x000000, 0);
 
       const interaction = new Interaction(renderer, scene, camera);
-      console.log(interaction);
+      //console.log(interaction);
 
       const group = new Three.Group();
       this.images.forEach((el, i) => {
@@ -183,6 +206,7 @@ export default {
       })(0);
 
       return group;
+      /* eslint-enable */
     },
     inertia: function () {
       this.position += -this.scrollSpeed;
@@ -246,8 +270,66 @@ export default {
         });
       }
     },
+    preload: function () {
+      //console.log(preload);
+      var imageFiles = this.images;
+      var images = [];
+      let that = this;
+      imageFiles.forEach((ImgFile, index) => {
+        let imageLoaded = function () {
+          that.preloader.cached += 1;
+          if (that.preloader.cached == imageFiles.length) {
+            that.preloader.complete = true;
+          }
+        };
+        let loadImage = function (url) {
+          var image = new Image();
+          image.addEventListener("load", imageLoaded, false);
+          image.src = url;
+          return image;
+        };
+        images[index] = loadImage(ImgFile.img);
+      });
+    },
+    touchScroll: function () {
+      let that = this;
+      const body = document.body;
+      body.addEventListener("touchstart", function (event) {
+        that.touch.yStart = event.touches[0].clientY;
+      });
+      body.addEventListener("touchmove", function (event) {
+        let yNew = event.touches[0].clientY;
+        that.touch.distanceFromStart = yNew - that.touch.yStart;
+
+        let normalisation = that.touch.distanceFromStart / 8000;
+
+        if (normalisation < 0) {
+          //we are touching upward
+          console.log("upwards");
+        } else {
+          //we are touching upwards
+          console.log("downwards");
+        }
+
+        if (that.touch.last < normalisation) {
+          //console.log("last less");
+          //that.touch.yStart = event.touches[0].clientY;
+          //that.position += normalisation;
+        } else {
+          //console.log("last more");
+          that.position += normalisation;
+        }
+
+        that.touch.last = normalisation;
+
+        //that.touch.test += normalisation;
+
+        //console.log("touch: ", newnew / 8000);
+      });
+    },
   },
   mounted() {
+    this.preload();
     //Scroll feedback
     window.addEventListener("wheel", (e) => {
       let delta = 0;
@@ -261,6 +343,9 @@ export default {
         this.scrollSpeed += delta;
       }
     });
+
+    this.touchScroll();
+
     this.inertia();
 
     //Initialising Three.js scenes
@@ -270,7 +355,7 @@ export default {
     let canvas2 = document.getElementById("canvas2");
     let group2 = this.init(canvas2, 0.5, true);
 
-    console.log(group1, group2);
+    //console.log(group1, group2);
 
     //Rotate and move the meshes
     this.moveGroup(group1, true, false);

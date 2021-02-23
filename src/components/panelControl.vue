@@ -1,7 +1,7 @@
 <template>
   <div class="head" id="panelHead" v-if="true">
     <div class="fixed">
-      <div class="xBtn" @click="$emit('close')"></div>
+      <div class="xBtn" v-if="!down" @click="$emit('close')"></div>
       <div class="percentage" :style="'width: ' + sliderPercent + '%;'"></div>
       <div
         class="panelIndicator"
@@ -14,7 +14,12 @@
           '%;'
         "
       >
-        <h1>{{ indicatorPanel.title }}</h1>
+        <fittyComponent
+          :positionPercent="panelPercent.position"
+          :indicatorPanel="indicatorPanel"
+          :sliderActive="slider"
+          :numberOfPanels="targets.length"
+        />
       </div>
       <div
         class="sliderIndicator"
@@ -38,13 +43,19 @@
 
 
 <script>
+import fittyComponent from "./fittyComponent.vue";
+
 export default {
   name: "panelControl",
+  components: {
+    fittyComponent,
+  },
   props: ["sumWidth", "position", "targets", "sliderIndicator", "sliderID"],
   data() {
     return {
       slider: 0,
       indicatorPanel: { position: 300, width: 100 },
+      down: false,
     };
   },
   watch: {
@@ -102,9 +113,11 @@ export default {
         duration: 0.3,
         pPosition: sliderPos,
       });
+      this.down = false;
     },
     downX: function () {
       this.$emit("sliderToggle", true);
+      this.down = true;
     },
   },
   mounted() {
@@ -124,8 +137,7 @@ export default {
 
 .panelIndicator {
   position: absolute;
-  background-color: gray;
-  opacity: 0.8;
+  background-color: rgb(192, 192, 192);
   right: 0vw;
   width: 10vw;
   height: 100%;
@@ -133,9 +145,8 @@ export default {
   z-index: 2;
   animation-name: opacity;
   animation-duration: 0.8s;
-  h1 {
+  #fittyComponent {
     position: absolute;
-    width: 100vw;
   }
 }
 
@@ -164,11 +175,10 @@ export default {
   }
 }
 .percentage {
-  opacity: 0.2;
-  background-color: gray;
+  background-color: rgb(223, 223, 223);
   width: 100vw;
   height: 100%;
-  z-index: 3;
+  z-index: 1;
 }
 
 .lol {
