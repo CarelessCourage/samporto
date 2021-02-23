@@ -5,18 +5,20 @@
       <p>{{ touch.yStart }}</p>
       <p>{{ touch.distanceFromStart }}</p>
     </div>
-    <div class="titles" :class="{ expanded: expanded }">
-      <h1 v-if="Math.round(position) >= -0">The unborn are a</h1>
-      <h1 v-if="Math.round(position) == -1">God is god</h1>
-      <h1 v-if="Math.round(position) == -2">This is</h1>
-      <h1 v-if="Math.round(position) == -3">Get mad</h1>
-      <h1 v-if="Math.round(position) == -4">fol</h1>
-      <h1 v-if="Math.round(position) <= -5">About</h1>
-      <div class="debug" v-if="false">
-        <p>position: {{ position }}</p>
-        <p>scrollSpeed: {{ scrollSpeed }}</p>
+    <transition name="title">
+      <div class="titles" :class="{ expanded: expanded }" v-if="!navigation">
+        <h1 v-if="Math.round(position) >= -0">The unborn are a</h1>
+        <h1 v-if="Math.round(position) == -1">God is god</h1>
+        <h1 v-if="Math.round(position) == -2">This is</h1>
+        <h1 v-if="Math.round(position) == -3">Get mad</h1>
+        <h1 v-if="Math.round(position) == -4">fol</h1>
+        <h1 v-if="Math.round(position) <= -5">About</h1>
+        <div class="debug" v-if="false">
+          <p>position: {{ position }}</p>
+          <p>scrollSpeed: {{ scrollSpeed }}</p>
+        </div>
       </div>
-    </div>
+    </transition>
     <div class="webGL">
       <div id="canvas"></div>
       <div class="sheet" :class="{ open: expanded }"></div>
@@ -36,7 +38,7 @@ import vertex from "./shader/vertex.glsl";
 
 export default {
   name: "ThreeTest",
-  props: ["expanded"],
+  props: ["expanded", "navigation"],
   data() {
     return {
       preloader: {
@@ -377,10 +379,7 @@ export default {
   //transition: top 0.8s ease-in-out;
   transition: 0.8s ease-in-out;
   transition-delay: 0.4s;
-  &.expanded {
-    //left: 5vw;
-    //top: 120vh;
-  }
+
   h1 {
     width: 5em;
     line-height: 0.8em;
@@ -440,5 +439,14 @@ export default {
   height: 6em;
   width: 6em;
   background: red;
+}
+
+.title-enter-active,
+.title-leave-active {
+  transition: transform 0.5s;
+}
+.title-enter,
+.title-leave-to {
+  transform: translateX(-50em);
 }
 </style>

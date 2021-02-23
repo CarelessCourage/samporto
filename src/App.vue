@@ -16,16 +16,21 @@
       <p v-if="false">shiftLimit: {{ shiftLimit }}</p>
       <p v-if="false">cooldown: {{ cooldown }}</p>
     </div>
-    <navigation />
+    <navigation
+      @navClick="navigation = !navigation"
+      :navigation="navigation"
+      :expanded="expanded"
+    />
     <div
       class="page"
-      :class="{ engaged: panels }"
+      :class="{ engaged: panels, shift: navigation }"
       :style="'top: ' + mPosition + 'vh;'"
     >
       <threeScene
         class="section"
         @expand="expanded = !expanded"
         :expanded="expanded"
+        :navigation="navigation"
       />
       <div class="section lol" v-if="expanded">
         <panelsExpanded
@@ -71,9 +76,13 @@ export default {
       cooldown: false,
       panelPositionInactive: false,
       yStart: 0,
+      navigation: false,
     };
   },
   watch: {
+    expanded: function () {
+      this.navigation = false;
+    },
     shiftLimit: function () {
       //broken attempt to fix bug
       //this.cooldown = true;
@@ -176,10 +185,13 @@ html {
 }
 
 .page {
-  --marginTop: -8em;
-  --marginRight: 8em;
   background: white;
-  transform: translate(var(--marginTop), var(--marginRight));
+  transition: transform 0.8s ease-in-out;
+  &.shift {
+    --marginTop: -8em;
+    --marginRight: 8em;
+    transform: translate(var(--marginTop), var(--marginRight));
+  }
 }
 
 :root {
