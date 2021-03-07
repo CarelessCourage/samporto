@@ -1,12 +1,20 @@
 <template>
   <div class="ThreeTest">
+    <div class="tempBtn" v-if="true">
+      <p @click="test()">click</p>
+      <p @click="lol()">in</p>
+    </div>
     <div v-if="false">
       <p>{{ position }}</p>
       <p>{{ touch.yStart }}</p>
       <p>{{ touch.distanceFromStart }}</p>
     </div>
     <transition name="title">
-      <div class="titles" :class="{ expanded: expanded }" v-if="!navigation">
+      <div
+        class="titles"
+        :class="{ expanded: expanded }"
+        v-if="!navigation && false"
+      >
         <h1 v-if="Math.round(position) >= -0">The unborn are a</h1>
         <h1 v-if="Math.round(position) == -1">God is god</h1>
         <h1 v-if="Math.round(position) == -2">This is</h1>
@@ -41,6 +49,24 @@ export default {
   props: ["expanded", "navigation"],
   data() {
     return {
+      g: {
+        group1: null,
+        group2: null,
+      },
+      gPositions: {
+        preload: {
+          pos: [{ duration: 0, x: 0, y: 1, z: -1 }],
+          rot: [{ duration: 0, x: -1, y: -0, z: -0 }],
+        },
+        default: {
+          pos: { duration: 0.3, x: 1 },
+          rot: { duration: 0.3, x: -0.5, y: -0.5, z: -0.3 },
+        },
+        expanded: {
+          pos: { duration: 0.3, x: 0 },
+          rot: { duration: 0.3, x: -0, y: -0, z: -0 },
+        },
+      },
       preloader: {
         total: 0,
         cached: 0,
@@ -64,7 +90,7 @@ export default {
         },
       ],
       scrollSpeed: 0,
-      position: -1,
+      position: -0,
       touch: {
         test: 0,
         yStart: 0,
@@ -75,6 +101,19 @@ export default {
     };
   },
   methods: {
+    test: function () {
+      var imageLength = this.images.length - 1;
+
+      let tl = gsap.timeline();
+      tl.to(this, { duration: 0, position: -imageLength - 5 });
+
+      let targets = this.gPositions.preload;
+      this.moveGroupSequence(targets);
+    },
+    lol: function () {
+      let tl = gsap.timeline();
+      tl.to(this, { duration: 3, position: 0.0 });
+    },
     mesh: function (imgUrl, index, uniforms) {
       var imageJPG = document.createElement("img");
       imageJPG.src = imgUrl;
@@ -177,6 +216,7 @@ export default {
         mesh.cursor = "pointer";
 
         var changeCenteredPosition = (i) => {
+          //put the group in the middle for the expanded view
           let pos = Math.round(this.position);
           let ri = Math.round(i);
           if (pos < ri) {
@@ -185,7 +225,7 @@ export default {
             this.scrollSpeed = 0.2;
           } else if (pos == ri) {
             uniforms.expanded.value = this.expanded;
-            this.moveGroup(group, false, true);
+            this.binaryMoveGroup(false, true);
           }
         };
 
@@ -233,66 +273,6 @@ export default {
         this.scrollSpeed += 0.1;
       }
     },
-    moveGroup: function (group, bool, refresh) {
-      let stay = false;
-      stay = bool;
-
-      let expanded = this.expanded;
-
-      if (refresh) {
-        expanded = !this.expanded;
-        this.$emit("expand");
-      }
-
-      let rotation = group.rotation;
-      let position = group.position;
-
-      if (!expanded || stay) {
-        gsap.to(rotation, {
-          duration: 0.3,
-          x: -0.5,
-          y: -0.5,
-          z: -0.3,
-        });
-
-        gsap.to(position, {
-          duration: 0.3,
-          x: 1,
-        });
-      } else {
-        gsap.to(rotation, {
-          duration: 0.3,
-          x: -0,
-          y: -0,
-          z: -0,
-        });
-        gsap.to(position, {
-          duration: 0.3,
-          x: 0,
-        });
-      }
-    },
-    preload: function () {
-      //console.log(preload);
-      var imageFiles = this.images;
-      var images = [];
-      let that = this;
-      imageFiles.forEach((ImgFile, index) => {
-        let imageLoaded = function () {
-          that.preloader.cached += 1;
-          if (that.preloader.cached == imageFiles.length) {
-            that.preloader.complete = true;
-          }
-        };
-        let loadImage = function (url) {
-          var image = new Image();
-          image.addEventListener("load", imageLoaded, false);
-          image.src = url;
-          return image;
-        };
-        images[index] = loadImage(ImgFile.img);
-      });
-    },
     touchScroll: function () {
       let that = this;
       const body = document.body;
@@ -329,6 +309,100 @@ export default {
         //console.log("touch: ", newnew / 8000);
       });
     },
+    preload: function () {
+      //console.log(preload);
+      var imageFiles = this.images;
+      var images = [];
+      let that = this;
+      imageFiles.forEach((ImgFile, index) => {
+        let imageLoaded = function () {
+          that.preloader.cached += 1;
+          if (that.preloader.cached == imageFiles.length) {
+            that.preloader.complete = true;
+          }
+        };
+        let loadImage = function (url) {
+          var image = new Image();
+          image.addEventListener("load", imageLoaded, false);
+          image.src = url;
+          return image;
+        };
+        images[index] = loadImage(ImgFile.img);
+      });
+    },
+    moveGroupSequence: function (targets) {
+      //Does the same as moveGroup but it lets you chain togheter multiple targets using GSAP target
+      //Define move function
+      var move = (g) => {
+        let rotation = g.rotation;
+        let position = g.position;
+
+        var tlRot = gsap.timeline();
+        var tlPos = gsap.timeline();
+
+        targets.rot.forEach((tar) => {
+          tlRot.to(rotation, tar);
+        });
+
+        targets.pos.forEach((tar) => {
+          tlPos.to(position, tar);
+        });
+      };
+
+      move(this.g.group1);
+      move(this.g.group2);
+    },
+    moveGroup: function (target, single) {
+      //Define move function
+      var move = (g) => {
+        let rotation = g.rotation;
+        let position = g.position;
+
+        gsap.to(rotation, target.rot);
+        gsap.to(position, target.pos);
+      };
+
+      //Move groups
+      if (single) {
+        //If sigle is passed as true then we will only move the top group.
+        move(this.g.group1);
+      } else {
+        //If its not move both
+        move(this.g.group1);
+        move(this.g.group2);
+      }
+    },
+    binaryMoveGroup: function (bool, refresh) {
+      let stay = false;
+      stay = bool;
+
+      let expanded = this.expanded;
+
+      if (refresh) {
+        //open expanded view
+        expanded = !this.expanded;
+        this.$emit("expand");
+      }
+
+      if (!expanded || stay) {
+        //Set the group position either to the default position or the expanded view position depending on the expanded state
+        let target = this.gPositions.default;
+        this.moveGroup(target);
+      } else {
+        let target = this.gPositions.expanded;
+        this.moveGroup(target, true);
+      }
+    },
+    initMoveGroup: function () {
+      //Initialising Three.js scenes
+      let canvas = document.getElementById("canvas");
+      this.g.group1 = this.init(canvas, 0.0, false);
+      let canvas2 = document.getElementById("canvas2");
+      this.g.group2 = this.init(canvas2, 0.5, true);
+
+      //Rotate and move the meshes
+      this.binaryMoveGroup(false, false);
+    },
   },
   mounted() {
     this.preload();
@@ -346,29 +420,32 @@ export default {
       }
     });
 
+    //Doesnt work yet
     this.touchScroll();
 
     this.inertia();
 
-    //Initialising Three.js scenes
-    let canvas = document.getElementById("canvas");
-    let group1 = this.init(canvas, 0.0, false);
-
-    let canvas2 = document.getElementById("canvas2");
-    let group2 = this.init(canvas2, 0.5, true);
-
-    //console.log(group1, group2);
-
     //Rotate and move the meshes
-    this.moveGroup(group1, true, false);
-    this.moveGroup(group2, false, false);
-
-    //group2.position.x = 0;
+    this.initMoveGroup();
   },
 };
 </script>
 
 <style scoped lang="scss">
+.tempBtn {
+  background: rgb(0, 0, 0);
+  color: white;
+  width: 5em;
+  padding: 2em;
+  position: absolute;
+  z-index: 100;
+  bottom: 0px;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.5;
+  }
+}
+
 .titles {
   position: absolute;
   top: 20vw;
