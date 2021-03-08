@@ -409,7 +409,7 @@ export default {
     //Scroll feedback
     window.addEventListener("wheel", (e) => {
       let delta = 0;
-      let amount = 1 * 0.04;
+      let amount = this.$store.state.scrollAmount;
       if (!this.expanded) {
         if (e.deltaY > 0) {
           delta = amount;

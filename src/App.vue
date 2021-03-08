@@ -157,22 +157,44 @@ export default {
         return res.json;
       });
     },
+    scrollManager: function () {
+      window.addEventListener("wheel", (e) => {
+        //Takes scroll event and modifies the mScroll variable based on a global amount
+        let delta = 0;
+        let amount = this.$store.state.scrollAmount * 20;
+        if (this.expanded) {
+          if (e.deltaY > 0) {
+            delta = amount;
+          } else if (e.deltaY < 0) {
+            delta = -amount;
+          }
+          this.mScroll += delta;
+          console.log("mScroll: ", this.mScroll);
+          this.changeShiftLimit();
+        }
+      });
+
+      function detectTrackPad(e) {
+        //Check whether the scroll is coming from a mouse wheel or a track pad
+        var isTrackpad = false;
+        if (e.wheelDeltaY) {
+          if (e.wheelDeltaY === (e.deltaY * -3)) {
+            isTrackpad = true;
+          }
+        }
+        else if (e.deltaMode === 0) {
+          isTrackpad = true;
+        }
+        console.log(isTrackpad ? "Trackpad detected" : "Mousewheel detected");
+      }
+
+      document.addEventListener("mousewheel", detectTrackPad, false);
+      document.addEventListener("DOMMouseScroll", detectTrackPad, false);
+
+    },
   },
   mounted() {
-    window.addEventListener("wheel", (e) => {
-      let delta = 0;
-      let amount = this.$store.state.scrollAmount;
-      if (this.expanded) {
-        if (e.deltaY > 0) {
-          delta = amount;
-        } else if (e.deltaY < 0) {
-          delta = -amount;
-        }
-        this.mScroll += delta;
-        this.changeShiftLimit();
-      }
-    });
-
+    this.scrollManager();
     //this.touchScroll();
     this.magneticScroll();
   },

@@ -5,7 +5,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    scrollAmount: 0.5
+    scrollAmount: 0.005
   },
   mutations: {
     scrollAmountChange(state, payload) {
