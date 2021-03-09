@@ -1,9 +1,5 @@
 <template>
   <div class="ThreeTest">
-    <div class="tempBtn" v-if="true">
-      <p @click="test()">click</p>
-      <p @click="lol()">in</p>
-    </div>
     <div v-if="false">
       <p>{{ position }}</p>
       <p>{{ touch.yStart }}</p>
@@ -36,7 +32,6 @@
 </template>
 
 <script>
-//import preload from "preloadjs";
 import * as Three from "three";
 import { Interaction } from "three.interaction";
 import gsap from "gsap";
@@ -55,16 +50,16 @@ export default {
       },
       gPositions: {
         preload: {
-          pos: [{ duration: 0, x: 0, y: 1, z: -1 }],
+          pos: [{ duration: 0, x: 0, y: 1, z: -1}],
           rot: [{ duration: 0, x: -1, y: -0, z: -0 }],
         },
         default: {
-          pos: { duration: 0.3, x: 1 },
-          rot: { duration: 0.3, x: -0.5, y: -0.5, z: -0.3 },
+          pos: { duration: 0.6, x: 1, y: 0, z: 0 },
+          rot: { duration: 0.6, x: -0.5, y: -0.5, z: -0.3 },
         },
         expanded: {
-          pos: { duration: 0.3, x: 0 },
-          rot: { duration: 0.3, x: -0, y: -0, z: -0 },
+          pos: { duration: 1, x: 0, y: 0, z: 0 },
+          rot: { duration: 1, x: -0, y: -0, z: -0 },
         },
       },
       preloader: {
@@ -101,7 +96,7 @@ export default {
     };
   },
   methods: {
-    test: function () {
+    initialPreloadPosition: function () {
       var imageLength = this.images.length - 1;
 
       let tl = gsap.timeline();
@@ -110,11 +105,8 @@ export default {
       let targets = this.gPositions.preload;
       this.moveGroupSequence(targets);
     },
-    lol: function () {
-      let tl = gsap.timeline();
-      tl.to(this, { duration: 3, position: 0.0 });
-    },
-    mesh: function (imgUrl, index, uniforms) {
+    createMesh: function (imgUrl, index, uniforms) {
+      //Creates a mesh plane with the assigned image and uniforms
       var imageJPG = document.createElement("img");
       imageJPG.src = imgUrl;
 
@@ -160,7 +152,10 @@ export default {
 
       return mesh;
     },
-    init: function (canvas, opacity, hole) {
+    assembleMesh: function (canvas, opacity, hole) {
+      //use createMesh to make a mesh for each image in image array. 
+      //assemble them to a group to easily move them rogheter and add group to the three.js scene
+
       /* eslint-disable */
 
       let container = canvas;
@@ -212,25 +207,32 @@ export default {
           },
         };
 
-        let mesh = this.mesh(el.img, i, uniforms);
+        let mesh = this.createMesh(el.img, i, uniforms);
         mesh.cursor = "pointer";
 
-        var changeCenteredPosition = (i) => {
-          //put the group in the middle for the expanded view
+        var clickedMesh = (i) => {
+          //put the mesh in the middle vertically
+          //or open expanded state
           let pos = Math.round(this.position);
           let ri = Math.round(i);
           if (pos < ri) {
+            //if the clicked mesh is above the centered mesh 
+            //add some scroll value to send it into the centered view
             this.scrollSpeed = -0.2;
           } else if (pos > ri) {
+            //if the clicked mesh is bellow the centered mesh 
+            //add some scroll value to send it into the centered view
             this.scrollSpeed = 0.2;
           } else if (pos == ri) {
+            //if the clicked mesh is in the center
+            //initiate expanded state with this mesh
             uniforms.expanded.value = this.expanded;
             this.binaryMoveGroup(false, true);
           }
         };
 
         mesh.on("click", function () {
-          changeCenteredPosition(-i);
+          clickedMesh(-i);
         });
 
         group.add(mesh);
@@ -251,6 +253,7 @@ export default {
       /* eslint-enable */
     },
     inertia: function () {
+
       this.position += -this.scrollSpeed;
       this.scrollSpeed *= 0.85;
       this.rounded = Math.round(this.position);
@@ -355,11 +358,19 @@ export default {
     moveGroup: function (target, single) {
       //Define move function
       var move = (g) => {
+        delete target.pos.parent;
+        delete target.rot.parent;
+
         let rotation = g.rotation;
         let position = g.position;
 
         gsap.to(rotation, target.rot);
         gsap.to(position, target.pos);
+
+          //console.log("move: ", target);
+        console.log("move: ", target);
+        //console.log("position: ", position);
+
       };
 
       //Move groups
@@ -386,23 +397,83 @@ export default {
 
       if (!expanded || stay) {
         //Set the group position either to the default position or the expanded view position depending on the expanded state
-        let target = this.gPositions.default;
-        this.moveGroup(target);
+        let _default = this.gPositions.default;
+        this.moveGroup(_default);
       } else {
-        let target = this.gPositions.expanded;
-        this.moveGroup(target, true);
+        let _expanded = this.gPositions.expanded;
+
+        //console.log("ex: ", _expanded.pos.x, _expanded.pos.y);
+        this.moveGroup(_expanded, true);
       }
     },
     initMoveGroup: function () {
       //Initialising Three.js scenes
       let canvas = document.getElementById("canvas");
-      this.g.group1 = this.init(canvas, 0.0, false);
+      this.g.group1 = this.assembleMesh(canvas, 0.0, false);
       let canvas2 = document.getElementById("canvas2");
-      this.g.group2 = this.init(canvas2, 0.5, true);
+      this.g.group2 = this.assembleMesh(canvas2, 0.5, true);
+
+      //set initial group position
+      this.initialPreloadPosition();
+    },
+    groupEnterAnimation: function () {
+       function ease(target, ease) {
+          target.pos.ease = ease;
+          target.rot.ease = ease;
+       }
+       function changeDuration(target, time) {
+          target.pos.duration = time;
+          target.rot.duration = time;
+       }
+
+      let master = gsap.timeline({ defaults: { ease: "power2.out" } });
+      master.to(this, { duration: 3, position: 0.0 });
+
+      let _default = this.gPositions.default;
+      changeDuration(_default, 2);
+      ease(_default, "power3.inOut")
+      let defaultTime = _default.pos.duration;
+
+      let _expanded = this.gPositions.expanded;
+      //_expanded.pos.z = -2;
+      //_expanded.pos.y = 1
+      changeDuration(_expanded, 2);
+      let expandedTime = _expanded.pos.duration;
+  
+  
+      function move(g, target, time) {
+        let tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+        let rotation = g.rotation;
+        let position = g.position;
+
+        tl.to(rotation, target.rot);
+        tl.to(position, target.pos, "-=" + time);
+
+        return tl;
+      }
+
+      //If its not move both
+      master.add(move(this.g.group1, _expanded, expandedTime))
+      master.add(move(this.g.group2, _expanded, expandedTime), "-=" + expandedTime)
+
+      //If its not move both
+      master.add(move(this.g.group1, _default, defaultTime), "-=" + expandedTime / 2)
+      master.add(move(this.g.group2, _default, defaultTime), "-=" + defaultTime)
 
       //Rotate and move the meshes
-      this.binaryMoveGroup(false, false);
+      //this.binaryMoveGroup(false, false);
+      
     },
+  },
+  watch: {
+    "preloader.complete": function (e) {
+      //console.log("log: ");
+      if(e) {
+        this.groupEnterAnimation();
+      }
+  
+    }
   },
   mounted() {
     this.preload();
@@ -427,25 +498,12 @@ export default {
 
     //Rotate and move the meshes
     this.initMoveGroup();
+
   },
 };
 </script>
 
 <style scoped lang="scss">
-.tempBtn {
-  background: rgb(0, 0, 0);
-  color: white;
-  width: 5em;
-  padding: 2em;
-  position: absolute;
-  z-index: 100;
-  bottom: 0px;
-  cursor: pointer;
-  &:hover {
-    opacity: 0.5;
-  }
-}
-
 .titles {
   position: absolute;
   top: 20vw;
