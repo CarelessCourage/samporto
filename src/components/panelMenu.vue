@@ -126,9 +126,9 @@ export default {
     menuToggleClicked: function () {
       let toggle = this.menuToggle;
       if (toggle) {
-        this.$store.commit("scrollAmountChange", 0.5);
+        this.$store.commit("scrollMultiplierChange", 20);
       } else {
-        this.$store.commit("scrollAmountChange", 10);
+        this.$store.commit("scrollMultiplierChange", 40);
       }
       this.menuToggle = !this.menuToggle;
 

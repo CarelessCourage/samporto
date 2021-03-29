@@ -161,7 +161,8 @@ export default {
       window.addEventListener("wheel", (e) => {
         //Takes scroll event and modifies the mScroll variable based on a global amount
         let delta = 0;
-        let amount = this.$store.state.scrollAmount * 20;
+        let store = this.$store.state;
+        let amount = store.scrollAmount * store.scrollMultiplier;
         if (this.expanded) {
           if (e.deltaY > 0) {
             delta = amount;
@@ -174,23 +175,30 @@ export default {
         }
       });
 
+      let that = this;
+
       function detectTrackPad(e) {
         //Check whether the scroll is coming from a mouse wheel or a track pad
         var isTrackpad = false;
+        let amount = 0.05;
+
         if (e.wheelDeltaY) {
-          if (e.wheelDeltaY === (e.deltaY * -3)) {
+          if (e.wheelDeltaY === e.deltaY * -3) {
             isTrackpad = true;
+            amount = 0.005;
           }
-        }
-        else if (e.deltaMode === 0) {
+        } else if (e.deltaMode === 0) {
           isTrackpad = true;
+          amount = 0.005;
         }
-        console.log(isTrackpad ? "Trackpad detected" : "Mousewheel detected");
+
+        that.$store.dispatch("scrollDeltaChange", amount);
+        //console.log(isTrackpad ? "Trackpad detected" : "Mousewheel detected");
+        return isTrackpad; //just to avoid error
       }
 
       document.addEventListener("mousewheel", detectTrackPad, false);
       document.addEventListener("DOMMouseScroll", detectTrackPad, false);
-
     },
   },
   mounted() {
