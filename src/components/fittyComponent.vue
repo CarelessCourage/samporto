@@ -91,7 +91,6 @@ span {
     opacity: 1;
   }
   p {
-    //text-transform: uppercase;
     width: 800px;
     max-height: 1em;
     font-weight: bold;

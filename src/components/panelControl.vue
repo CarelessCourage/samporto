@@ -127,6 +127,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '@/css' as *;
+
 #panelHead {
   animation-name: opacity;
   animation-duration: 0.2s;
@@ -137,7 +139,7 @@ export default {
 
 .panelIndicator {
   position: absolute;
-  background-color: rgb(192, 192, 192);
+  background-color: rgba($fg, 0.5);
   right: 0vw;
   width: 10vw;
   height: 100%;
@@ -162,7 +164,6 @@ export default {
 .sliderIndicator {
   z-index: 9;
   position: absolute;
-  //background-color: rgb(226, 58, 58);
   width: 100vw;
   height: 100%;
   &::after {
@@ -171,11 +172,11 @@ export default {
     right: 0px;
     width: 0.2em;
     height: 100%;
-    background: black;
+    background: $fg;
   }
 }
 .percentage {
-  background-color: rgb(223, 223, 223);
+  background-color: rgba($fg, 0.2);
   width: 100vw;
   height: 100%;
   z-index: 1;
@@ -198,22 +199,18 @@ export default {
   input {
     width: 100vw;
     height: var(--panelHeadHeight);
-    background: blue;
-    border: solid 3px rgb(255, 0, 0);
   }
 }
 .fixed {
   position: fixed;
   top: 0px;
   left: 0px;
-  //@functionbackground-color: red;
   width: 100vw;
   height: var(--panelHeadHeight);
   display: flex;
-  //justify-content: flex-end;
   align-items: center;
-  border-bottom: var(--border) solid rgb(0, 0, 0);
-  border-top: var(--border) solid rgb(0, 0, 0);
+  border-bottom: var(--border) solid $fg;
+  border-top: var(--border) solid $fg;
 }
 
 .head {
@@ -234,7 +231,7 @@ export default {
     position: absolute;
     height: 0.5em;
     width: 100%;
-    background: black;
+    background: $fg;
     top: 40%;
     left: 0px;
     transform: rotateZ(45deg);

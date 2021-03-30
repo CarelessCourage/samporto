@@ -41,9 +41,6 @@
         />
       </div>
     </div>
-    <div class="UX_scrollSignal" v-if="false">
-      <h1>Keep Scrolling</h1>
-    </div>
   </div>
 </template>
 
@@ -210,12 +207,10 @@ export default {
 </script>
 
 <style lang="scss">
-html {
-  background: black;
-}
+@use '@/css' as *;
 
 .page {
-  background: white;
+  background: $bg;
   transition: transform 0.8s ease-in-out;
   &.shift {
     --marginTop: -8em;
@@ -228,37 +223,6 @@ html {
   --border: 3px;
 }
 
-h1 {
-  margin: 0px;
-  text-align: left;
-  font-size: 10em;
-  text-transform: uppercase;
-  font-weight: bold;
-  line-height: 0.8em;
-}
-
-h2 {
-  margin: 0px;
-  text-align: left;
-  font-size: 2em;
-  font-weight: bold;
-}
-
-p {
-  margin: 0px;
-  text-align: left;
-  font-size: 1.5em;
-}
-
-.lol {
-  height: 100vh;
-  z-index: 7;
-  transition: top 0.8s ease-in-out;
-  &.engaged {
-    top: 0px;
-  }
-}
-
 .page {
   position: absolute;
   top: 0vh;
@@ -267,40 +231,19 @@ p {
   }
 }
 
-.UX_scrollSignal {
-  height: 5em;
-  transition: height 0.4s;
-  max-height: 50em;
-  width: 100%;
-  background: white;
-  position: fixed;
-  z-index: 6;
-  bottom: 0vh;
-  p {
-    margin: 0px;
-  }
-  h1 {
-    margin: 0px;
-    font-size: 10em;
-    text-align: left;
-    text-transform: uppercase;
-  }
-}
 html {
+  background: $fg;
   max-width: 100vw;
   max-height: 100vh;
   overflow-y: hidden;
   overflow-x: hidden;
 }
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
   max-width: 100vw;
   position: fixed;
 }
+
 body {
   margin: 0px;
 }

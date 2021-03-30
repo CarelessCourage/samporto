@@ -49,10 +49,13 @@ export default {
 </script>
 
 <style lang="scss">
+@use '@/css' as *;
+
 h1 {
   position: absolute;
   left: 0.5em;
 }
+
 #intro {
   width: 100vw;
   --border: 3px;
@@ -62,14 +65,14 @@ h1 {
   grid-template-columns: 1fr 1fr;
 
   .header {
-    border-right: var(--border) solid rgb(0, 0, 0);
-    border-left: var(--border) solid rgb(0, 0, 0);
+    border-right: var(--border) solid $fg;
+    border-left: var(--border) solid $fg;
 
     .patch {
-      border-right: var(--border) solid rgb(0, 0, 0);
-      border-left: var(--border) solid rgb(0, 0, 0);
-      border-top: var(--border) solid rgb(0, 0, 0);
-      background-color: white;
+      border-right: var(--border) solid $fg;
+      border-left: var(--border) solid $fg;
+      border-top: var(--border) solid $fg;
+      background-color: $bg;
       width: calc(100% + var(--border) + var(--border));
       margin-left: calc(var(--border) * -1);
       height: 90vh;
@@ -77,7 +80,6 @@ h1 {
       top: -15vh;
       display: flex;
       justify-content: center;
-      //align-items: center;
       padding: 5em;
       padding-top: 10em;
       box-sizing: border-box;

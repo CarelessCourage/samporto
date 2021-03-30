@@ -328,6 +328,8 @@ export default {
 </script>
 
 <style lang="scss">
+@use '@/css' as *;
+
 .slider2 input {
   position: fixed;
   top: 0px;
@@ -338,7 +340,7 @@ export default {
 #expanded {
   --panelHeadHeight: 15vh;
   position: relative;
-  background: white;
+  background: $bg;
   transition: 0.4s;
   display: grid;
   grid-template-rows: var(--panelHeadHeight) 1fr;

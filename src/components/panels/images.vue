@@ -97,9 +97,11 @@ export default {
 </script>
 
 <style lang="scss">
+@use '@/css' as *;
+
 .container2 {
   top: 3em;
-  background-color: white;
+  background-color: $bg;
   max-width: 45em;
   position: absolute;
   z-index: 0;
@@ -113,19 +115,19 @@ export default {
   top: -5em;
   display: grid;
   grid-template-rows: auto 1fr 1fr 1fr;
-  background-color: white;
+  background-color: $bg;
   max-width: 45em;
   position: absolute;
   z-index: 4;
   right: 10vw;
   text-align: left;
-  border: var(--border) solid black;
+  border: var(--border) solid $fg;
   border-bottom: none;
 }
 
 .entry {
-  border-top: var(--border) solid black;
-  border-bottom: var(--border) solid black;
+  border-top: var(--border) solid $fg;
+  border-bottom: var(--border) solid $fg;
   padding: 4em;
   padding-top: 1em;
   padding-bottom: 1em;
@@ -141,7 +143,6 @@ export default {
 }
 
 .images {
-  //background: red;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -150,10 +151,10 @@ export default {
 #images {
   --border: 3px;
   width: 100vw;
-  //background: rgb(255, 224, 224);
   position: relative;
   height: calc(100vh - 15vh);
 }
+
 img {
   float: left;
   object-fit: cover;
@@ -163,16 +164,19 @@ img {
   max-height: calc(100vh - 15vh);
   z-index: 5;
 }
+
 img.main {
   width: 40em;
   top: calc(var(--border) * 2);
 }
+
 img.subOne {
   width: 25em;
   position: absolute;
   left: 25vw;
   top: calc(var(--border) * 2);
 }
+
 img.subTwo {
   width: 30em;
   height: 18em;

@@ -1,0 +1,33 @@
+@use './colors.scss'as *;
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+
+* {
+    font-family: 'Libre Baskerville', serif;
+    margin: 0px;
+}
+
+#app {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: $fg;
+}
+
+h1 {
+    font-weight: bold;
+    font-size: 10em;
+    font-size: clamp(5em, 10vw, 10em);
+    line-height: 1.1em;
+    letter-spacing: 0.01em;
+}
+
+h2 {
+    font-size: 2em;
+    font-size: clamp(2em, 1vw, 3em);
+}
+
+p {
+    font-size: 1.5em;
+    font-size: clamp(.5em, 1.2vw, 2.5em);
+    line-height: 1.6em;
+    letter-spacing: 0.01em;
+}

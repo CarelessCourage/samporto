@@ -247,15 +247,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '@/css' as *;
+
 .highlight {
-  //border-radius: 1em;
-  background: rgb(177, 177, 177);
+  background: rgba($bg, 0.7);
   height: 0px;
   width: 0px;
+  padding: 2em;
   position: absolute;
-  top: 0px;
+  top: 2em;
   left: 0px;
-  border: solid var(--border) black;
+  border: solid var(--border) $fg;
   transition: 0.4s;
   pointer-events: none;
   opacity: 0;
@@ -270,21 +272,19 @@ export default {
   padding-top: 10em;
   width: 100vw;
   box-sizing: border-box;
-  //height: calc(100vh - var(--panelHeadHeight));
   left: 0;
   right: 0;
   margin-left: auto;
   margin-right: auto;
   overflow-y: hidden;
   overflow-x: hidden;
-  background-color: rgb(253, 214, 214);
+  background-color: $fg-spice;
   position: fixed;
   margin-top: calc(var(--border) * -1);
   column-count: 1;
   transition: all 0.8s ease-in-out;
   transition-property: padding, transform, width, height, border;
-  border: solid var(--border) black;
-  //border-top: none;
+  border: solid var(--border) $fg;
   &.off {
     transform: translateX(100vw);
   }
@@ -298,7 +298,7 @@ export default {
     }
     .current {
       --dot: 30px;
-      color: red;
+      color: $bg-spice;
       position: relative;
       letter-spacing: 6px;
       &::after {
@@ -307,7 +307,7 @@ export default {
         height: var(--dot);
         width: var(--dot);
         border-radius: 50%;
-        background: red;
+        background: $bg-spice;
         top: calc(50% - var(--dot) / 2);
         left: calc(var(--dot) * -0.5);
       }
@@ -317,12 +317,9 @@ export default {
     margin-bottom: 1em;
   }
   ul.main {
-    //transform: translateY(-15vh);
     top: 0vh;
     position: relative;
     z-index: 99;
-    //background: rgba(255, 0, 0, 0.212);
-    //width: 20%;
   }
   li.title,
   .title > p {
@@ -353,8 +350,6 @@ export default {
   position: absolute;
   top: calc(var(--border) * 2);
   width: 100%;
-  //background-color: rgb(216, 165, 165);
-  //background-color: white;
   z-index: 99;
 }
 
@@ -367,10 +362,10 @@ export default {
   right: 0px;
   width: var(--size);
   height: var(--size);
-  background: rgb(255, 255, 255);
-  border-top: solid var(--border) black;
-  border-bottom: solid var(--border) black;
-  border-left: solid var(--border) black;
+  background: $bg;
+  border-top: solid var(--border) $fg;
+  border-bottom: solid var(--border) $fg;
+  border-left: solid var(--border) $fg;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -378,13 +373,13 @@ export default {
     --margin: 10px;
     height: var(--border);
     width: 70%;
-    background: black;
+    background: $fg;
     &::after,
     &::before {
       content: "";
       height: var(--border);
       width: 70%;
-      background: black;
+      background: $fg;
       position: absolute;
       left: 0;
       right: 0;

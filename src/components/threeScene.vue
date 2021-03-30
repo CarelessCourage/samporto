@@ -25,7 +25,10 @@
     </transition>
     <div class="webGL">
       <div id="canvas"></div>
-      <div class="sheet" :class="{ open: expanded }"></div>
+      <div id="sheets" :class="{ open: expanded }">
+        <div class="sheet"></div>
+        <div class="sheet"></div>
+      </div>
       <div id="canvas2"></div>
     </div>
   </div>
@@ -50,16 +53,16 @@ export default {
       },
       gPositions: {
         preload: {
-          pos: [{ duration: 0, x: 0, y: 1, z: -1}],
-          rot: [{ duration: 0, x: -1, y: -0, z: -0 }],
+          pos: [{ dur: 0, x: 0, y: 1, z: -1 }],
+          rot: [{ dur: 0, x: -1, y: -0, z: -0 }],
         },
         default: {
-          pos: { duration: 0.6, x: 1, y: 0, z: 0 },
-          rot: { duration: 0.6, x: -0.5, y: -0.5, z: -0.3 },
+          pos: { dur: 0.4, x: 1, y: 0, z: 0 },
+          rot: { dur: 0.4, x: -0.5, y: -0.5, z: -0.3 },
         },
         expanded: {
-          pos: { duration: 1, x: 0, y: 0, z: 0 },
-          rot: { duration: 1, x: -0, y: -0, z: -0 },
+          pos: { dur: 0.4, x: 0, y: 0, z: 0 },
+          rot: { dur: 0.4, x: -0, y: -0, z: -0 },
         },
       },
       preloader: {
@@ -153,7 +156,7 @@ export default {
       return mesh;
     },
     assembleMesh: function (canvas, opacity, hole) {
-      //use createMesh to make a mesh for each image in image array. 
+      //use createMesh to make a mesh for each image in image array.
       //assemble them to a group to easily move them rogheter and add group to the three.js scene
 
       /* eslint-disable */
@@ -216,11 +219,11 @@ export default {
           let pos = Math.round(this.position);
           let ri = Math.round(i);
           if (pos < ri) {
-            //if the clicked mesh is above the centered mesh 
+            //if the clicked mesh is above the centered mesh
             //add some scroll value to send it into the centered view
             this.scrollSpeed = -0.2;
           } else if (pos > ri) {
-            //if the clicked mesh is bellow the centered mesh 
+            //if the clicked mesh is bellow the centered mesh
             //add some scroll value to send it into the centered view
             this.scrollSpeed = 0.2;
           } else if (pos == ri) {
@@ -253,7 +256,6 @@ export default {
       /* eslint-enable */
     },
     inertia: function () {
-
       this.position += -this.scrollSpeed;
       this.scrollSpeed *= 0.85;
       this.rounded = Math.round(this.position);
@@ -358,19 +360,24 @@ export default {
     moveGroup: function (target, single) {
       //Define move function
       var move = (g) => {
+        //=========Reset and Fix target object
         delete target.pos.parent;
         delete target.rot.parent;
 
+        function resetDuration(target) {
+          target.pos.duration = target.pos.dur;
+          target.rot.duration = target.rot.dur;
+        }
+
+        resetDuration(target);
+
+        //=========Setup
         let rotation = g.rotation;
         let position = g.position;
 
+        //=========Execute
         gsap.to(rotation, target.rot);
         gsap.to(position, target.pos);
-
-          //console.log("move: ", target);
-        console.log("move: ", target);
-        //console.log("position: ", position);
-
       };
 
       //Move groups
@@ -417,30 +424,28 @@ export default {
       this.initialPreloadPosition();
     },
     groupEnterAnimation: function () {
-       function ease(target, ease) {
-          target.pos.ease = ease;
-          target.rot.ease = ease;
-       }
-       function changeDuration(target, time) {
-          target.pos.duration = time;
-          target.rot.duration = time;
-       }
+      function ease(target, ease) {
+        target.pos.ease = ease;
+        target.rot.ease = ease;
+      }
+      function changeDuration(target, time) {
+        target.pos.duration = time;
+        target.rot.duration = time;
+      }
 
       let master = gsap.timeline({ defaults: { ease: "power2.out" } });
       master.to(this, { duration: 3, position: 0.0 });
 
       let _default = this.gPositions.default;
       changeDuration(_default, 2);
-      ease(_default, "power3.inOut")
+      ease(_default, "power3.inOut");
       let defaultTime = _default.pos.duration;
 
       let _expanded = this.gPositions.expanded;
-      //_expanded.pos.z = -2;
-      //_expanded.pos.y = 1
+
       changeDuration(_expanded, 2);
       let expandedTime = _expanded.pos.duration;
-  
-  
+
       function move(g, target, time) {
         let tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
@@ -454,26 +459,33 @@ export default {
       }
 
       //If its not move both
-      master.add(move(this.g.group1, _expanded, expandedTime))
-      master.add(move(this.g.group2, _expanded, expandedTime), "-=" + expandedTime)
+      master.add(move(this.g.group1, _expanded, expandedTime));
+      master.add(
+        move(this.g.group2, _expanded, expandedTime),
+        "-=" + expandedTime
+      );
 
       //If its not move both
-      master.add(move(this.g.group1, _default, defaultTime), "-=" + expandedTime / 2)
-      master.add(move(this.g.group2, _default, defaultTime), "-=" + defaultTime)
+      master.add(
+        move(this.g.group1, _default, defaultTime),
+        "-=" + expandedTime / 2
+      );
+      master.add(
+        move(this.g.group2, _default, defaultTime),
+        "-=" + defaultTime
+      );
 
       //Rotate and move the meshes
       //this.binaryMoveGroup(false, false);
-      
     },
   },
   watch: {
     "preloader.complete": function (e) {
       //console.log("log: ");
-      if(e) {
+      if (e) {
         this.groupEnterAnimation();
       }
-  
-    }
+    },
   },
   mounted() {
     this.preload();
@@ -498,12 +510,13 @@ export default {
 
     //Rotate and move the meshes
     this.initMoveGroup();
-
   },
 };
 </script>
 
 <style scoped lang="scss">
+@use '@/css' as *;
+
 .titles {
   position: absolute;
   top: 20vw;
@@ -511,7 +524,6 @@ export default {
   max-height: 10vh;
   z-index: 10;
   pointer-events: none;
-  //transition: top 0.8s ease-in-out;
   transition: 0.8s ease-in-out;
   transition-delay: 0.4s;
 
@@ -527,8 +539,8 @@ export default {
   }
 }
 
-.sheet {
-  background-color: rgb(255, 225, 225);
+#sheets {
+  background: $fg-spice;
   height: 100vh;
   width: 0vw;
   position: relative;
@@ -536,44 +548,43 @@ export default {
   transition: 0.4s ease-in-out;
   &.open {
     width: 100vw;
+    .sheet {
+      width: 100%;
+    }
   }
-}
-
-.n {
-  position: absolute;
-  top: 100px;
-  background: blue;
-  height: 10px;
-  width: 80px;
+  .sheet {
+    position: absolute;
+    top: 0px;
+    background: $bg-spice;
+    width: 0vw;
+    height: 100vh;
+    transition: 0.6s ease-in-out;
+    &:nth-of-type(1) {
+      background: $mg;
+      transition: 0.5s ease-in-out;
+    }
+  }
 }
 
 .webGL {
   position: relative;
-  //background: pink;
   width: 100vw;
   height: 100vh;
 }
 
-#canvas,
-#canvas2 {
+#canvas {
   height: 100vh;
   width: 100vw;
   position: absolute;
   z-index: 6;
   top: 0px;
   left: 0px;
-  //background: red;
-}
-#canvas2 {
-  //background: red;
-  left: 0px;
-  z-index: 4;
 }
 
-.box {
-  height: 6em;
-  width: 6em;
-  background: red;
+#canvas2 {
+  @extend #canvas;
+  left: 0px;
+  z-index: 4;
 }
 
 .title-enter-active,

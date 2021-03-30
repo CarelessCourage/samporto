@@ -33,6 +33,8 @@ export default {
 </script>
 
 <style lang="scss">
+@use '@/css' as *;
+
 #nav {
   position: relative;
   width: 100vw;
@@ -42,31 +44,28 @@ export default {
 .burger {
   --size: 2em;
   --lineH: 0.25em;
-  --color: black;
+
   position: relative;
   width: calc(var(--size) + 0.5em);
   height: var(--size);
   display: flex;
   align-items: center;
-  //transform: rotate(45deg);
   transition: transform 0.4s ease-in-out;
-  .lines,
-  .lines::after,
-  .lines::before {
-    height: var(--lineH);
+  .lines {
     width: 100%;
-    background: var(--color);
+    height: var(--lineH);
+    background: $fg;
     transition: background 0.4s ease-in-out, top 0.4s ease-in-out 0.4s,
       bottom 0.4s ease-in-out 0.4s, transform 0.4s;
-  }
-  .lines {
     &::before {
+      @extend .lines;
       content: "";
       position: absolute;
       top: 0em;
       left: 0em;
     }
     &::after {
+      @extend .lines;
       content: "";
       position: absolute;
       bottom: 0em;
@@ -81,11 +80,11 @@ export default {
   top: 2em;
   z-index: 100;
   transition: transform 0.4s ease-in-out, background 0.4s ease-in-out;
-  background: white;
+  background: $bg;
   cursor: pointer;
   transition: 0.4s;
   &:hover {
-    border: 2px solid black;
+    border: 2px solid $fg;
   }
   transform: scale(1.5);
   .burger {
@@ -98,11 +97,11 @@ export default {
   border: none;
   transform: scale(1);
   .burger {
-    --color: white;
     transform: rotate(45deg);
   }
 
   .lines {
+    background: $bg;
     &::before {
       top: calc(50% - 0.19em);
       transform: rotate(90deg);
@@ -119,8 +118,7 @@ export default {
   margin-top: 0.3em;
   font-size: 3em;
   line-height: 1em;
-  color: white;
-  //background-color: red;
+  color: $bg;
 }
 
 .burger-enter-active,
