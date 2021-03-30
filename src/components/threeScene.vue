@@ -99,6 +99,27 @@ export default {
     };
   },
   methods: {
+    responsiveGroupPosition: function () {
+      function clamp(num, min, max) {
+        return num <= min ? min : num >= max ? max : num;
+      }
+
+      function percentage(partialValue, totalValue) {
+        return (100 * partialValue) / totalValue;
+      }
+
+      let width = window.innerWidth;
+
+      let min = 600;
+      let max = 1400;
+      let range = max - min;
+      let clampedWidth = clamp(width, 500, 1600);
+      let normalizedWidth = clampedWidth - min;
+      let per = percentage(normalizedWidth, range);
+      let desimalPer = clamp(per, 0, 100) / 100;
+
+      this.gPositions.default.pos.x = desimalPer;
+    },
     initialPreloadPosition: function () {
       var imageLength = this.images.length - 1;
 
@@ -251,6 +272,23 @@ export default {
         renderer.render(scene, camera);
         requestAnimationFrame(refresher);
       })(0);
+
+      let that = this;
+
+      function frameRefresh() {
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(container.clientWidth, container.clientHeight);
+
+        that.responsiveGroupPosition();
+        that.moveGroup(that.gPositions.default, false);
+      }
+
+      window.addEventListener("resize", frameRefresh);
 
       return group;
       /* eslint-enable */
@@ -422,6 +460,9 @@ export default {
 
       //set initial group position
       this.initialPreloadPosition();
+
+      this.responsiveGroupPosition();
+      //this.moveGroup(this.gPositions.default, false);
     },
     groupEnterAnimation: function () {
       function ease(target, ease) {

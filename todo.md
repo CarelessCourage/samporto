@@ -7,16 +7,16 @@
     [100]: Remove error and warning buildup 1
 #vibe
     [100]: fade off center sub panels
-    [0]: sheet rainbow
+    [100]: sheet rainbow
     [0]: fancy wave on image
     [0]: grain
-    [0]: intro slide
+    [100]: intro slide
     [0]: quick slide
 #features
     [0]: data propagation
     [100]: image panel
     [100]: image panel variation
-    [0]: panel content outline
+    [100]: panel content outline
     [100]: menu
     [0]: logo
     [0]: about page
@@ -29,11 +29,11 @@
     [100]: scroll panel indicators
     [100]: make custom preloader function
 #Responsive
-    [0]: img panel
+    [100]: img panel
     [0]: intro panel
     [0]: fullstop panel
     [0]: three.js menu
     [0]: three.js select
     [0]: menu
 #port ver
-    [0]: color swatches panel
+    [100]: color swatches panel
