@@ -11,10 +11,10 @@
       "
     >
       <p>mPosition: {{ mPosition }}</p>
+      <p>pPosition: {{ pPos }}</p>
       <p v-if="false">mScroll: {{ mScroll }}</p>
       <p v-if="false">mTarget: {{ mTarget }}</p>
       <p v-if="false">shiftLimit: {{ shiftLimit }}</p>
-      <p v-if="false">cooldown: {{ cooldown }}</p>
     </div>
     <navigation
       @navClick="navigation = !navigation"
@@ -36,6 +36,7 @@
         <panelsExpanded
           :mScroll="mScroll"
           :mPos="mPosition"
+          @positionMove="pPositionMove"
           @close="togglePanel(0)"
           @panelPositionInactive="panelActivty"
         />
@@ -69,8 +70,8 @@ export default {
       mScroll: 0,
       mPosition: 0,
       mTarget: 0,
+      pPos: 0,
       shiftLimit: -25,
-      cooldown: false,
       panelPositionInactive: false,
       yStart: 0,
       navigation: false,
@@ -89,16 +90,11 @@ export default {
     expanded: function () {
       this.navigation = false;
     },
-    shiftLimit: function () {
-      //broken attempt to fix bug
-      //this.cooldown = true;
-      setTimeout(function () {
-        //console.log("lolololol", this.cooldown);
-        this.cooldown = false;
-      }, 3000);
-    },
   },
   methods: {
+    pPositionMove: function (value) {
+      this.pPos = value;
+    },
     panelActivty: function (bool) {
       this.panelPositionInactive = bool;
     },
@@ -153,6 +149,14 @@ export default {
 
       const body = document.body;
 
+      function executePositionMove() {
+        if (that.mPosition > -90 || that.pPos > -10) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+
       body.addEventListener("touchstart", function (event) {
         if (that.expanded) {
           start(event);
@@ -190,11 +194,12 @@ export default {
           let add = that.touch.touchDirection * 70;
           let p = _.clamp(that.mPosition + add, -100, 0);
 
-          console.log("flicked: ", p);
-          gsap.to(that, {
-            duration: 0.2,
-            mPosition: p,
-          });
+          if (executePositionMove()) {
+            gsap.to(that, {
+              duration: 0.2,
+              mPosition: p,
+            });
+          }
         }
       }
 
@@ -209,7 +214,9 @@ export default {
           //-- needs to check this in order to get a vector to use when later checking if the direction has changed
           if (moveY < lastY) {
             //If touch is continuing in the same direction
-            that.mPosition += distanceFromStart / normalisation;
+            if (executePositionMove()) {
+              that.mPosition += distanceFromStart / normalisation;
+            }
           } else {
             //reset If touch is in a still position or new direction
             startY = event.touches[0].clientY;
@@ -220,7 +227,9 @@ export default {
           //-- needs to check this in order to get a vector to use when later checking if the direction has changed
           if (moveY > lastY) {
             //Check if touch has changed direction
-            that.mPosition += distanceFromStart / normalisation;
+            if (executePositionMove()) {
+              that.mPosition += distanceFromStart / normalisation;
+            }
           } else {
             //reset If touch is in a still position or new direction
             startY = event.touches[0].clientY;
@@ -251,7 +260,6 @@ export default {
             delta = -amount;
           }
           this.mScroll += delta;
-          console.log("mScroll: ", this.mScroll);
           this.changeShiftLimit();
         }
       });
@@ -274,7 +282,6 @@ export default {
         }
 
         that.$store.dispatch("scrollDeltaChange", amount);
-        //console.log(isTrackpad ? "Trackpad detected" : "Mousewheel detected");
         return isTrackpad; //just to avoid error
       }
 

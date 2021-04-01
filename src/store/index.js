@@ -10,7 +10,6 @@ export default new Vuex.Store({
   },
   mutations: {
     scrollAmountChange(state, payload) {
-      console.log("new: ", payload);
       state.scrollAmount = payload;
     },
     scrollMultiplierChange(state, payload) {

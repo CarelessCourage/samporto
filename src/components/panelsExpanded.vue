@@ -4,16 +4,19 @@
       v-if="false"
       style="
         position: fixed;
-        top: 50;
+        top: 2vh;
         left: 50px;
         z-index: 10;
         text-align: left;
+        background: red;
       "
       @click="combineArrays"
     >
-      <p>pPosition: {{ pPosition }}</p>
-      <p>pTarget: {{ pTarget }}</p>
-      <p>sumWidth: {{ sumWidth }}</p>
+      <p style="font-size: 1em" v-if="false">mScroll: {{ mScroll }}</p>
+      <p style="font-size: 1em">pPosition: {{ pPosition }}</p>
+      <p style="font-size: 1em">mPosition: {{ mPos }}</p>
+      <p style="font-size: 1em" v-if="false">pTarget: {{ pTarget }}</p>
+      <p style="font-size: 1em" v-if="false">sumWidth: {{ sumWidth }}</p>
     </div>
     <div class="slider2" v-if="false">
       <input
@@ -163,7 +166,11 @@ export default {
       return index;
     },
   },
-
+  watch: {
+    pPosition: function (value) {
+      this.$emit("positionMove", value);
+    },
+  },
   methods: {
     slideToggle: function (bool) {
       this.slider = bool;
@@ -307,13 +314,18 @@ export default {
     },
     panelScroll: function () {
       //Update position on scroll
-      this.pPosition += -this.mScroll;
+      if (this.mPos < -99) {
+        this.pPosition += -this.mScroll;
+      }
 
       if (this.pPosition < -2) {
+        //If we are vertical scrolling turn off app scrolling
         this.$emit("panelPositionInactive", false);
-      } else {
-        //if the expanded panel has been scrolled back to the start
-        //this.$emit("panelPositionInactive", true);
+      } else if (this.mScroll < -5) {
+        //if the app core scroll is starting to move back up,
+        //meaning that we have gone back to the start with some extra margin.
+        //turn back on app scrolling
+        this.$emit("panelPositionInactive", true);
       }
 
       //Update target position to closest panel when scrolling
@@ -368,7 +380,6 @@ export default {
           let add = that.touch.touchDirection * 120;
           let p = _.clamp(that.pPosition + add, -that.sumWidth, 0);
 
-          console.log("flicked: ", p);
           gsap.to(that, {
             duration: 0.2,
             pPosition: p,
