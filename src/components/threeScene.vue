@@ -38,6 +38,7 @@
 import * as Three from "three";
 import { Interaction } from "three.interaction";
 import gsap from "gsap";
+var _ = require("lodash");
 
 import fragment from "./shader/fragment.glsl";
 import vertex from "./shader/vertex.glsl";
@@ -90,20 +91,18 @@ export default {
       scrollSpeed: 0,
       position: -0,
       touch: {
-        test: 0,
-        yStart: 0,
-        distanceFromStart: 0,
-        last: 0,
-        temp: false,
+        touchStartY: 0,
+        touchMoveY: {
+          now: 0,
+          last: 0,
+        },
+        flick: false,
+        touchDirection: 0,
       },
     };
   },
   methods: {
     responsiveGroupPosition: function () {
-      function clamp(num, min, max) {
-        return num <= min ? min : num >= max ? max : num;
-      }
-
       function percentage(partialValue, totalValue) {
         return (100 * partialValue) / totalValue;
       }
@@ -113,10 +112,10 @@ export default {
       let min = 600;
       let max = 1400;
       let range = max - min;
-      let clampedWidth = clamp(width, 500, 1600);
+      let clampedWidth = _.clamp(width, 500, 1600);
       let normalizedWidth = clampedWidth - min;
       let per = percentage(normalizedWidth, range);
-      let desimalPer = clamp(per, 0, 100) / 100;
+      let desimalPer = _.clamp(per, 0, 100) / 100;
 
       this.gPositions.default.pos.x = desimalPer;
     },
@@ -285,7 +284,9 @@ export default {
         renderer.setSize(container.clientWidth, container.clientHeight);
 
         that.responsiveGroupPosition();
-        that.moveGroup(that.gPositions.default, false);
+        if (!that.expanded) {
+          that.moveGroup(that.gPositions.default, false);
+        }
       }
 
       window.addEventListener("resize", frameRefresh);
@@ -318,39 +319,87 @@ export default {
     },
     touchScroll: function () {
       let that = this;
+      let touch = this.touch;
+      let moveY = touch.touchMoveY.now;
+      let lastY = touch.touchMoveY.last;
+      let startY = touch.touchStartY;
+
       const body = document.body;
+
       body.addEventListener("touchstart", function (event) {
-        that.touch.yStart = event.touches[0].clientY;
+        if (!that.expanded) {
+          start(event);
+        }
       });
+
       body.addEventListener("touchmove", function (event) {
-        let yNew = event.touches[0].clientY;
-        that.touch.distanceFromStart = yNew - that.touch.yStart;
-
-        let normalisation = that.touch.distanceFromStart / 8000;
-
-        if (normalisation < 0) {
-          //we are touching upward
-          console.log("upwards");
-        } else {
-          //we are touching upwards
-          console.log("downwards");
+        if (!that.expanded) {
+          move(event);
         }
-
-        if (that.touch.last < normalisation) {
-          //console.log("last less");
-          //that.touch.yStart = event.touches[0].clientY;
-          //that.position += normalisation;
-        } else {
-          //console.log("last more");
-          that.position += normalisation;
-        }
-
-        that.touch.last = normalisation;
-
-        //that.touch.test += normalisation;
-
-        //console.log("touch: ", newnew / 8000);
       });
+
+      body.addEventListener("touchend", function () {
+        if (!that.expanded) {
+          flick();
+        }
+      });
+
+      function start(event) {
+        touch.touchMoveY.flick = true;
+        setTimeout(function () {
+          touch.touchMoveY.flick = false;
+        }, 150);
+
+        startY = event.touches[0].clientY;
+        moveY = startY;
+        lastY = startY;
+      }
+
+      function flick() {
+        let dist = Math.abs(moveY - startY);
+        // Test for flick.
+        if (touch.touchMoveY.flick && dist > 0) {
+          //has stopped
+          let p = that.position + that.touch.touchDirection;
+          gsap.to(that, {
+            duration: 0.2,
+            position: p,
+          });
+        }
+      }
+
+      function move(event) {
+        let normalisation = 5000;
+        moveY = event.touches[0].clientY;
+        let distanceFromStart = moveY - startY;
+
+        if (moveY < startY) {
+          that.touch.touchDirection = -1;
+          //Check if touch is in an downward direction
+          //-- needs to check this in order to get a vector to use when later checking if the direction has changed
+          if (moveY < lastY) {
+            //If touch is continuing in the same direction
+            that.position += distanceFromStart / normalisation;
+          } else {
+            //reset If touch is in a still position or new direction
+            startY = event.touches[0].clientY;
+          }
+        } else {
+          that.touch.touchDirection = 1;
+          //Check if touch is in an upward direction
+          //-- needs to check this in order to get a vector to use when later checking if the direction has changed
+          if (moveY > lastY) {
+            //Check if touch has changed direction
+            that.position += distanceFromStart / normalisation;
+          } else {
+            //reset If touch is in a still position or new direction
+            startY = event.touches[0].clientY;
+          }
+        }
+
+        lastY = moveY;
+        touch.touchMoveY.active = false;
+      }
     },
     preload: function () {
       //console.log(preload);
@@ -462,7 +511,6 @@ export default {
       this.initialPreloadPosition();
 
       this.responsiveGroupPosition();
-      //this.moveGroup(this.gPositions.default, false);
     },
     groupEnterAnimation: function () {
       function ease(target, ease) {

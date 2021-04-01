@@ -74,6 +74,15 @@ export default {
       panelPositionInactive: false,
       yStart: 0,
       navigation: false,
+      touch: {
+        touchStartY: 0,
+        touchMoveY: {
+          now: 0,
+          last: 0,
+        },
+        flick: false,
+        touchDirection: 0,
+      },
     };
   },
   watch: {
@@ -137,15 +146,90 @@ export default {
     },
     touchScroll: function () {
       let that = this;
+      let touch = this.touch;
+      let moveY = touch.touchMoveY.now;
+      let lastY = touch.touchMoveY.last;
+      let startY = touch.touchStartY;
+
       const body = document.body;
+
       body.addEventListener("touchstart", function (event) {
-        this.yStart = event.touches[0].clientY;
+        if (that.expanded) {
+          start(event);
+        }
       });
+
       body.addEventListener("touchmove", function (event) {
-        let yNew = event.touches[0].clientY;
-        let newnew = yNew - this.yStart;
-        that.mPosition += newnew / 100;
+        if (that.expanded) {
+          move(event);
+        }
       });
+
+      body.addEventListener("touchend", function () {
+        if (that.expanded) {
+          flick();
+        }
+      });
+
+      function start(event) {
+        touch.touchMoveY.flick = true;
+        setTimeout(function () {
+          touch.touchMoveY.flick = false;
+        }, 150);
+
+        startY = event.touches[0].clientY;
+        moveY = startY;
+        lastY = startY;
+      }
+
+      function flick() {
+        let dist = Math.abs(moveY - startY);
+        // Test for flick.
+        if (touch.touchMoveY.flick && dist > 0) {
+          //has stopped
+          let add = that.touch.touchDirection * 70;
+          let p = _.clamp(that.mPosition + add, -100, 0);
+
+          console.log("flicked: ", p);
+          gsap.to(that, {
+            duration: 0.2,
+            mPosition: p,
+          });
+        }
+      }
+
+      function move(event) {
+        let normalisation = 20;
+        moveY = event.touches[0].clientY;
+        let distanceFromStart = moveY - startY;
+
+        if (moveY < startY) {
+          that.touch.touchDirection = -1;
+          //Check if touch is in an downward direction
+          //-- needs to check this in order to get a vector to use when later checking if the direction has changed
+          if (moveY < lastY) {
+            //If touch is continuing in the same direction
+            that.mPosition += distanceFromStart / normalisation;
+          } else {
+            //reset If touch is in a still position or new direction
+            startY = event.touches[0].clientY;
+          }
+        } else {
+          that.touch.touchDirection = 1;
+          //Check if touch is in an upward direction
+          //-- needs to check this in order to get a vector to use when later checking if the direction has changed
+          if (moveY > lastY) {
+            //Check if touch has changed direction
+            that.mPosition += distanceFromStart / normalisation;
+          } else {
+            //reset If touch is in a still position or new direction
+            startY = event.touches[0].clientY;
+          }
+        }
+
+        lastY = moveY;
+        touch.touchMoveY.active = false;
+      }
     },
     getDoc: function () {
       fetch(
@@ -200,7 +284,7 @@ export default {
   },
   mounted() {
     this.scrollManager();
-    //this.touchScroll();
+    this.touchScroll();
     this.magneticScroll();
   },
 };

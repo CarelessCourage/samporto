@@ -142,6 +142,15 @@ export default {
       targets: [],
       sumWidth: 0,
       panelsMenu: false,
+      touch: {
+        touchStartY: 0,
+        touchMoveY: {
+          now: 0,
+          last: 0,
+        },
+        flick: false,
+        touchDirection: 0,
+      },
     };
   },
   computed: {
@@ -319,9 +328,91 @@ export default {
 
       window.requestAnimationFrame(this.panelScroll);
     },
+    touchScroll: function () {
+      let that = this;
+      let touch = this.touch;
+      let moveY = touch.touchMoveY.now;
+      let lastY = touch.touchMoveY.last;
+      let startY = touch.touchStartY;
+
+      const body = document.body;
+
+      body.addEventListener("touchstart", function (event) {
+        start(event);
+      });
+
+      body.addEventListener("touchmove", function (event) {
+        move(event);
+      });
+
+      body.addEventListener("touchend", function () {
+        flick();
+      });
+
+      function start(event) {
+        touch.touchMoveY.flick = true;
+        setTimeout(function () {
+          touch.touchMoveY.flick = false;
+        }, 150);
+
+        startY = event.touches[0].clientX;
+        moveY = startY;
+        lastY = startY;
+      }
+
+      function flick() {
+        let dist = Math.abs(moveY - startY);
+        // Test for flick.
+        if (touch.touchMoveY.flick && dist > 0) {
+          //has stopped
+          let add = that.touch.touchDirection * 120;
+          let p = _.clamp(that.pPosition + add, -that.sumWidth, 0);
+
+          console.log("flicked: ", p);
+          gsap.to(that, {
+            duration: 0.2,
+            pPosition: p,
+          });
+        }
+      }
+
+      function move(event) {
+        let normalisation = 20;
+        moveY = event.touches[0].clientX;
+        let distanceFromStart = moveY - startY;
+
+        if (moveY < startY) {
+          that.touch.touchDirection = -1;
+          //Check if touch is in an downward direction
+          //-- needs to check this in order to get a vector to use when later checking if the direction has changed
+          if (moveY < lastY) {
+            //If touch is continuing in the same direction
+            that.pPosition += distanceFromStart / normalisation;
+          } else {
+            //reset If touch is in a still position or new direction
+            startY = event.touches[0].clientX;
+          }
+        } else {
+          that.touch.touchDirection = 1;
+          //Check if touch is in an upward direction
+          //-- needs to check this in order to get a vector to use when later checking if the direction has changed
+          if (moveY > lastY) {
+            //Check if touch has changed direction
+            that.pPosition += distanceFromStart / normalisation;
+          } else {
+            //reset If touch is in a still position or new direction
+            startY = event.touches[0].clientX;
+          }
+        }
+
+        lastY = moveY;
+        touch.touchMoveY.active = false;
+      }
+    },
   },
   mounted() {
     this.panelScroll();
+    this.touchScroll();
     this.targets = this.updateTargets();
   },
 };
