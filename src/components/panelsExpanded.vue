@@ -15,8 +15,8 @@
       <p style="font-size: 1em" v-if="false">mScroll: {{ mScroll }}</p>
       <p style="font-size: 1em">pPosition: {{ pPosition }}</p>
       <p style="font-size: 1em">mPosition: {{ mPos }}</p>
-      <p style="font-size: 1em" v-if="false">pTarget: {{ pTarget }}</p>
-      <p style="font-size: 1em" v-if="false">sumWidth: {{ sumWidth }}</p>
+      <p style="font-size: 1em" v-if="true">pTarget: {{ pTarget }}</p>
+      <p style="font-size: 1em" v-if="true">sumWidth: {{ sumWidth }}</p>
     </div>
     <div class="slider2" v-if="false">
       <input
@@ -146,6 +146,7 @@ export default {
       sumWidth: 0,
       panelsMenu: false,
       touch: {
+        enabled: false,
         touchStartY: 0,
         touchMoveY: {
           now: 0,
@@ -350,11 +351,25 @@ export default {
       const body = document.body;
 
       body.addEventListener("touchstart", function (event) {
-        start(event);
+        if (that.mPos < -99) {
+          touch.enabled = true;
+        } else {
+          touch.enabled = false;
+        }
+
+        if (touch.enabled) {
+          start(event);
+        }
       });
 
       body.addEventListener("touchmove", function (event) {
-        move(event);
+        if (that.mPos > -70) {
+          touch.enabled = false;
+        }
+
+        if (touch.enabled) {
+          move(event);
+        }
       });
 
       body.addEventListener("touchend", function () {
@@ -424,7 +439,17 @@ export default {
   mounted() {
     this.panelScroll();
     this.touchScroll();
-    this.targets = this.updateTargets();
+    let that = this;
+
+    function refreshTargets() {
+      console.log("panelsExpanded");
+      that.targets = that.updateTargets();
+    }
+
+    refreshTargets();
+    window.addEventListener("resize", () =>
+      setTimeout(() => refreshTargets(), 1000)
+    );
   },
 };
 </script>

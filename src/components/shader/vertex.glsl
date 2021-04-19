@@ -7,7 +7,7 @@ void main(){
     vUv=(uv-vec2(.5))*(.9-.2*inFocus)+vec2(.5);
     vec3 pos=position;
     
-    float scrollSpeed=scroll*.5;
+    float scrollSpeed=scroll*1.;
     
     pos.y+=sin(PI*uv.x)*scrollSpeed;
     pos.z+=sin(PI*uv.x)*scrollSpeed;

@@ -75,23 +75,23 @@ export default {
     },
     initPanel: function () {
       let panelPositions = [];
-      let pWidth = 900;
-      let w = pWidth;
-
-      window.onload = function () {
-        w = window.innerWidth;
-        pWidth = this.$refs.panel.offsetWidth;
-      };
-
-      let pPercentage = this.percentage(pWidth, w);
-
+      let pPercentage = this.percentage(
+        this.$refs.panel.offsetWidth,
+        window.innerWidth
+      );
       panelPositions.push({ name: "panel", width: pPercentage });
-
       this.$emit("mounted", panelPositions);
+      //console.log("assigned");
+    },
+    test: function () {
+      console.log("images");
     },
   },
   mounted() {
     this.initPanel();
+    window.addEventListener("resize", () =>
+      setTimeout(() => this.initPanel(), 1000)
+    );
   },
 };
 </script>
@@ -160,6 +160,9 @@ img {
   object-fit: cover;
   max-height: 10em;
   width: 10em;
+  min-width: 10em;
+  min-height: 10em;
+  background: $fg;
   position: relative;
   max-height: calc(100vh - 15vh);
   z-index: 5;
@@ -171,7 +174,7 @@ img.main {
 }
 
 img.subOne {
-  width: 25em;
+  width: 15em;
   position: absolute;
   left: 25vw;
   top: calc(var(--border) * 2);
@@ -184,5 +187,21 @@ img.subTwo {
   left: 42vw;
   bottom: 0em;
   z-index: 4;
+}
+
+@media only screen and (max-width: 600px) {
+  .container2 {
+    max-width: 100vw;
+    right: 0vw;
+  }
+
+  .container1 {
+    max-width: 90vw;
+    right: 5vw;
+  }
+
+  #images {
+    width: 200vw;
+  }
 }
 </style>

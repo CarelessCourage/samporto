@@ -2,7 +2,7 @@
   <div id="intro" ref="panel">
     <div class="header">
       <div class="patch">
-        <h1 :style="'left: ' + normalizePosition(5, 1) + 'vw;'">
+        <h1 :style="'left: ' + -pPosition + 'vw;'">
           {{ panel.title }}
         </h1>
       </div>
@@ -22,28 +22,22 @@ export default {
     percentage: function (partialValue, totalValue) {
       return (100 * partialValue) / totalValue;
     },
-    normalizePosition: function (pos, mul) {
-      //setup
-      let scroll = Math.abs(this.pPosition);
-      let position = Math.abs(this.panel.position);
-      let res = scroll - position;
+    initPanel: function () {
+      let panelPositions = [];
+      let pWidth = this.$refs.panel.offsetWidth;
+      var w = window.innerWidth;
+      let pPercentage = this.percentage(pWidth, w);
 
-      //Add user input, divide and multiply
-      let diffMul = res * mul;
+      panelPositions.push({ name: "panel", width: pPercentage });
 
-      //result
-      return diffMul + pos;
+      this.$emit("mounted", panelPositions);
     },
   },
   mounted() {
-    let panelPositions = [];
-    let pWidth = this.$refs.panel.offsetWidth;
-    var w = window.innerWidth;
-    let pPercentage = this.percentage(pWidth, w);
-
-    panelPositions.push({ name: "panel", width: pPercentage });
-
-    this.$emit("mounted", panelPositions);
+    this.initPanel();
+    window.addEventListener("resize", () =>
+      setTimeout(() => this.initPanel(), 1000)
+    );
   },
 };
 </script>
@@ -66,17 +60,17 @@ h1 {
 
   .header {
     border-right: var(--border) solid $fg;
-    border-left: var(--border) solid $fg;
+    //border-left: var(--border) solid $fg;
 
     .patch {
       border-right: var(--border) solid $fg;
-      border-left: var(--border) solid $fg;
+      //border-left: var(--border) solid $fg;
       border-top: var(--border) solid $fg;
       background-color: $bg;
       width: calc(100% + var(--border) + var(--border));
       margin-left: calc(var(--border) * -1);
-      height: 90vh;
       position: relative;
+      height: 90vh;
       top: -15vh;
       display: flex;
       justify-content: center;
@@ -95,6 +89,22 @@ h1 {
     p {
       text-align: left;
       width: 60%;
+    }
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  #intro {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+    .header .patch {
+      height: auto;
+    }
+    .content {
+      position: relative;
+      z-index: 20;
+      background: $bg;
+      border-right: var(--border) solid $fg;
     }
   }
 }

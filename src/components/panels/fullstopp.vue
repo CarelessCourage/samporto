@@ -20,7 +20,6 @@
   </div>
 </template>
 
-
 <script>
 export default {
   name: "fullstopp",
@@ -53,19 +52,25 @@ export default {
     percentage: function (partialValue, totalValue) {
       return (100 * partialValue) / totalValue;
     },
+    initPanel: function () {
+      let panelPositions = [];
+      let pWidth = this.$refs.panel.offsetWidth;
+      let spWidth = document.querySelector("#subPanel").offsetWidth;
+      var w = window.innerWidth;
+      let pPercentage = this.percentage(pWidth, w);
+      let spPercentage = this.percentage(spWidth, w);
+
+      panelPositions.push({ name: "panel", width: pPercentage });
+      panelPositions.push({ name: "subPanel", width: spPercentage });
+
+      this.$emit("mounted", panelPositions);
+    },
   },
   mounted() {
-    let panelPositions = [];
-    let pWidth = this.$refs.panel.offsetWidth;
-    let spWidth = document.querySelector("#subPanel").offsetWidth;
-    var w = window.innerWidth;
-    let pPercentage = this.percentage(pWidth, w);
-    let spPercentage = this.percentage(spWidth, w);
-
-    panelPositions.push({ name: "panel", width: pPercentage });
-    panelPositions.push({ name: "subPanel", width: spPercentage });
-
-    this.$emit("mounted", panelPositions);
+    this.initPanel();
+    window.addEventListener("resize", () =>
+      setTimeout(() => this.initPanel(), 1000)
+    );
   },
 };
 </script>
@@ -117,6 +122,31 @@ export default {
       padding-bottom: 2em;
       p {
         width: 80%;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  #fullstopp {
+    --subPanelWidth: 90vw;
+    padding: 5vw;
+    margin-top: 2em;
+    .container {
+      position: relative;
+    }
+    .source {
+      padding: 0em;
+      border: none;
+    }
+    .content {
+      margin-top: 2em;
+      div {
+        height: auto;
+        border: none;
+        p {
+          width: 100%;
+        }
       }
     }
   }

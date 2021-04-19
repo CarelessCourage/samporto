@@ -16,7 +16,7 @@
     [0]: intro panel
     [0]: fullstop panel
     [0]: menu
-
+    [0]: Update targets on resize
 
 ##Done!
 #Buggs
@@ -44,3 +44,9 @@
     [100]: three.js expanded
 #port ver
     [100]: color swatches panel
+
+###Library
+[0]: Get Targets Wrapper
+[0]: Get scroll Value listener
+[0]: Degenerate scroll
+[0]: Three.js Img stacker with GLSL effects
